@@ -1,0 +1,132 @@
+<div class="container">
+  <div class="top-nav">
+    <button (click)="goBack()" class="btn-back">
+      <span>←</span> Voltar
+    </button>
+    <div class="top-nav-title">Detalhe do Presente</div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loader-container">
+      <div class="spinner"></div>
+      <p class="loader-text">Buscando detalhes do presente...</p>
+    </div>
+  }
+
+  @if (errorMessage(); as error) {
+    <div class="content-padding">
+      <div class="error-card">
+        <span class="error-icon">⚠</span>
+        <p class="error-msg">{{ error }}</p>
+      </div>
+    </div>
+  }
+
+  @if (!isLoading() && !errorMessage() && product(); as prod) {
+    <main class="flex-grow">
+      <div class="image-section">
+        @if (prod.photoUrl) {
+          <img [src]="prod.photoUrl" alt="Foto do Presente" class="detail-product-image" />
+        } @else {
+          <div class="detail-product-placeholder">
+            <span>🎁</span>
+          </div>
+        }
+      </div>
+
+      <div class="content-padding">
+        <div class="product-header-info">
+          <h1 class="detail-product-name">{{ prod.name }}</h1>
+          <div class="detail-price-badge">
+            <span class="price-val">{{ prod.price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
+          </div>
+        </div>
+
+        @if (prod.description) {
+          <div class="detail-description-box">
+            <h4>Descrição</h4>
+            <p>{{ prod.description }}</p>
+          </div>
+        }
+
+        <hr class="divider" />
+
+        @if (prod.isPurchased) {
+          <div class="already-purchased-box">
+            <span class="heart-badge">❤️</span>
+            <h3>Este presente já foi comprado!</h3>
+            <p>Os noivos já ganharam esse carinho. Por favor, volte à lista e selecione outro presente disponível.</p>
+            <button (click)="goBack()" class="btn-gold" style="margin-top: 16px; width: 100%;">Voltar à Lista</button>
+          </div>
+        } @else {
+          <form (submit)="onSubmit(); $event.preventDefault()" class="guest-form">
+            <h3 class="form-title">Presentear Casal</h3>
+            <p class="form-subtitle">Preencha seus dados para prosseguir ao pagamento do presente.</p>
+
+            @if (getQuantityRange().length > 1) {
+              <div class="form-group">
+                <label class="form-label" for="qty">Escolha a Quantidade</label>
+                <select 
+                  id="qty"
+                  [ngModel]="selectedQuantity()" 
+                  (ngModelChange)="selectedQuantity.set($event)" 
+                  name="selectedQuantity"
+                  class="form-input form-select"
+                >
+                  @for (q of getQuantityRange(); track q) {
+                    <option [value]="q">{{ q }}x · Total: {{ (prod.price * q) | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</option>
+                  }
+                </select>
+              </div>
+            }
+
+            <div class="form-group">
+              <label class="form-label" for="name">Seu Nome</label>
+              <input 
+                type="text" 
+                id="name"
+                [ngModel]="guestName()" 
+                (ngModelChange)="guestName.set($event)" 
+                name="guestName"
+                placeholder="Ex: Maria Souza" 
+                class="form-input"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="contact">Seu WhatsApp / Telefone</label>
+              <input 
+                type="tel" 
+                id="contact"
+                [ngModel]="guestContact()" 
+                (ngModelChange)="guestContact.set($event)" 
+                name="guestContact"
+                placeholder="Ex: (11) 99999-9999" 
+                class="form-input"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="message">Mensagem de Carinho (Opcional)</label>
+              <textarea 
+                id="message"
+                [ngModel]="guestMessage()" 
+                (ngModelChange)="guestMessage.set($event)" 
+                name="guestMessage"
+                placeholder="Deseje algo lindo ao casal..." 
+                rows="4" 
+                class="form-input form-textarea"
+              ></textarea>
+            </div>
+
+            <button type="submit" class="btn-gold btn-submit-payment">
+              Confirmar & Pagar Presente ➔
+            </button>
+          </form>
+        }
+      </div>
+    </main>
+  }
+</div>

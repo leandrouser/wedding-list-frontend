@@ -1,0 +1,414 @@
+<nav class="page-nav">
+  <button type="button" class="btn-nav" (click)="goBack()">
+    <span class="nav-icon">&#8592;</span> Voltar
+  </button>
+  <button type="button" class="btn-logout" (click)="logout()">
+        <span>&#x2192;</span> Sair
+      </button>
+  <a routerLink="/" class="btn-nav">
+    <span class="nav-icon">&#8962;</span> Home
+  </a>
+</nav>
+
+@if (showDeleteConfirm()) {
+  <div class="modal-backdrop">
+    <div class="modal-panel modal-sm">
+      <div class="modal-header">
+        <h3>Excluir lista</h3>
+        <button type="button" class="btn-close" (click)="cancelDelete()">x</button>
+      </div>
+      <p class="delete-warning">
+        Tem certeza que deseja excluir a lista <strong>{{ listToDelete()?.coupleName }}</strong>?
+        Todos os produtos vinculados também serão removidos. Essa ação não pode ser desfeita.
+      </p>
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" (click)="cancelDelete()">Cancelar</button>
+        <button type="button" class="btn-danger" (click)="deleteList()" [disabled]="isDeleting()">
+          @if (isDeleting()) { Excluindo... } @else { Confirmar exclusão }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<section class="dashboard-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Administrador</p>
+      <h2>Dashboard</h2>
+      <p>Gerencie listas de presentes e os acessos dos casais.</p>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="btn-outline" (click)="openStoreForm()">&#9881; Minha Loja</button>
+      <button type="button" class="btn-outline" (click)="openAccessForm()">Cadastrar Acesso</button>
+      <button type="button" class="btn-gold" (click)="openListForm()">Nova Lista</button>
+      
+    </div>
+  </header>
+
+  @if (successMessage()) {
+    <div class="alert success-alert">{{ successMessage() }}</div>
+  }
+
+  @if (errorMessage()) {
+    <div class="alert error-alert">{{ errorMessage() }}</div>
+  }
+
+  <section class="lists-section">
+    <div class="section-header">
+      <div>
+        <h3>Listas cadastradas</h3>
+        <p>Acompanhe as listas ativas e cadastre o acesso do casal.</p>
+      </div>
+      <button type="button" class="btn-refresh" (click)="loadLists()">Atualizar</button>
+    </div>
+
+    @if (isLoading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Carregando listas...</p>
+      </div>
+    } @else {
+      @if (lists().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">+</div>
+          <h3>Nenhuma lista cadastrada</h3>
+          <p>Crie a primeira lista e depois cadastre o acesso do casal.</p>
+          <button type="button" class="btn-gold" (click)="openListForm()">Criar Lista</button>
+        </div>
+      } @else {
+        <div class="lists-grid">
+          @for (list of lists(); track list.id) {
+            <article class="list-card">
+              <div class="photo-box">
+                @if (list.photoUrl) {
+                  <img [src]="list.photoUrl" [alt]="list.coupleName">
+                } @else {
+                  <span>{{ list.coupleName.charAt(0).toUpperCase() }}</span>
+                }
+              </div>
+
+              <div class="list-content">
+                <span class="tag">{{ formatTitle(list.giftTitle) }}</span>
+                <h4>{{ list.coupleName }}</h4>
+                <p>{{ list.eventDate | date: 'dd/MM/yyyy' }}</p>
+                <p class="muted">WhatsApp: {{ list.coupleWhatsapp || 'Nao informado' }}</p>
+
+                @if (list.hasCouple) {
+                  <span class="couple-badge">
+                    &#10003; Acesso: {{ list.coupleUsername }}
+                  </span>
+                } @else {
+                  <span class="couple-badge pending">Sem acesso cadastrado</span>
+                }
+              </div>
+
+              <div class="card-actions">
+                <a [routerLink]="['/superadmin/lista', list.id]" class="btn-card">Ver lista</a>
+                <button type="button" class="btn-card" (click)="openEditForm(list)">
+                  &#9998; Editar
+                </button>
+                <button
+                  type="button"
+                  class="btn-card primary"
+                  (click)="openLinkForm(list)">
+                  {{ list.hasCouple ? '✏️ Editar acesso' : 'Cadastrar acesso' }}
+                </button>
+                <button type="button" class="btn-card danger" (click)="confirmDelete(list)">
+                  &#128465; Excluir
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    }
+  </section>
+</section>
+
+@if (showLinkForm()) {
+  <div class="modal-backdrop">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h3>Vincular casal à lista</h3>
+        <button type="button" class="btn-close" (click)="closeLinkForm()">x</button>
+      </div>
+
+      <div class="form-group">
+        <label>Buscar casal pelo usuário</label>
+        <input
+          class="form-control"
+          [(ngModel)]="coupleSearch"
+          (input)="onSearchCouple()"
+          placeholder="Digite o nome de usuário...">
+      </div>
+
+      @if (isSearching()) {
+        <p class="muted" style="margin-top: 8px;">Buscando...</p>
+      }
+
+      @if (coupleResults().length > 0) {
+        <ul class="couple-list">
+          @for (couple of coupleResults(); track couple.id) {
+            <li
+              class="couple-item"
+              [class.selected]="selectedCouple()?.id === couple.id"
+              (click)="selectCouple(couple)">
+              <span class="couple-name">{{ couple.username }}</span>
+              <span class="couple-phone">{{ couple.phoneNumber }}</span>
+              @if (couple.giftListId) {
+                <span class="couple-badge pending">Já vinculado</span>
+              }
+            </li>
+          }
+        </ul>
+      }
+
+      <div class="modal-actions" style="margin-top: 24px;">
+        <button type="button" class="btn-outline" (click)="closeLinkForm()">Cancelar</button>
+        <button
+          type="button"
+          class="btn-gold"
+          [disabled]="!selectedCouple() || isLinking()"
+          (click)="linkCouple()">
+          @if (isLinking()) { Salvando... }
+          @else { {{ isEditingLink() ? 'Atualizar acesso' : 'Vincular casal' }} }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showAccessForm()) {
+  <div class="modal-backdrop">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h3>Cadastrar acesso do casal</h3>
+        <button type="button" class="btn-close" (click)="closeAccessForm()">x</button>
+      </div>
+
+      <form (ngSubmit)="createCoupleAccess()" #accessCreateForm="ngForm" class="edit-form">
+        <div class="form-group">
+          <label for="giftListId">Lista vinculada</label>
+          <select id="giftListId" name="giftListId" [(ngModel)]="accessForm.giftListId" required class="form-control">
+            <option [ngValue]="null">Selecione uma lista</option>
+            @for (list of lists(); track list.id) {
+              <option [ngValue]="list.id">{{ list.coupleName }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="accessUsername">Usuario *</label>
+          <input id="accessUsername" name="accessUsername" [(ngModel)]="accessForm.username" required class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="accessPhone">Telefone *</label>
+          <input id="accessPhone" name="accessPhone" [(ngModel)]="accessForm.phoneNumber" required class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="accessPassword">Senha *</label>
+          <input id="accessPassword" name="accessPassword" type="password" [(ngModel)]="accessForm.password" required class="form-control">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-outline" (click)="closeAccessForm()">Cancelar</button>
+          <button type="submit" class="btn-gold" [disabled]="!accessCreateForm.form.valid || isSavingAccess()">
+            @if (isSavingAccess()) {
+              Salvando...
+            } @else {
+              Cadastrar Acesso
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+@if (showEditForm()) {
+  <div class="modal-backdrop">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h3>Editar lista</h3>
+        <button type="button" class="btn-close" (click)="closeEditForm()">x</button>
+      </div>
+
+      <form (ngSubmit)="saveEdit()" #editForm="ngForm" class="edit-form">
+        <div class="form-group">
+          <label for="editGiftTitle">Título da lista *</label>
+          <select id="editGiftTitle" name="editGiftTitle" [(ngModel)]="editFormData.giftTitle" required class="form-control">
+            <option value="">Selecione um título</option>
+            <option value="LISTA_DE_CASAMENTO">Lista de Casamento</option>
+            <option value="LISTA_DE_PRESENTE">Lista de Presente</option>
+            <option value="LISTA_DE_CASA_NOVA">Lista de Casa Nova</option>
+            <option value="LISTA_DE_15_ANOS">Lista de 15 Anos</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="editCoupleName">Nomes dos noivos *</label>
+          <input id="editCoupleName" name="editCoupleName" [(ngModel)]="editFormData.coupleName" required class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="editEventDate">Data do evento *</label>
+          <input id="editEventDate" name="editEventDate" type="date" [(ngModel)]="editFormData.eventDate" required class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="editCoupleWhatsapp">WhatsApp dos noivos</label>
+          <input id="editCoupleWhatsapp" name="editCoupleWhatsapp" [(ngModel)]="editFormData.coupleWhatsapp" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label>Foto do casal</label>
+          <div class="photo-upload-area">
+            @if (editPhotoPreview()) {
+              <div class="photo-preview">
+                <img [src]="editPhotoPreview()" alt="Preview">
+                <button type="button" class="btn-remove-photo" (click)="removePhoto('edit')">✕</button>
+              </div>
+            } @else {
+              <span class="photo-placeholder-upload">📷</span>
+            }
+            <div class="photo-actions">
+              <label class="btn-photo">
+                📁 Galeria
+                <input type="file" accept="image/*" style="display:none"
+                  (change)="onPhotoSelected($event, 'edit')">
+              </label>
+              <label class="btn-photo">
+                📸 Câmera
+                <input type="file" accept="image/*" capture="environment" style="display:none"
+                  (change)="onCameraCapture($event, 'edit')">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="editMessage">Mensagem</label>
+          <textarea id="editMessage" name="editMessage" [(ngModel)]="editFormData.message" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-outline" (click)="closeEditForm()">Cancelar</button>
+          <button type="submit" class="btn-gold" [disabled]="!editForm.form.valid || isSavingEdit()">
+            @if (isSavingEdit()) { Salvando... } @else { Salvar alterações }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showListForm()) {
+  <div class="modal-backdrop">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h3>Nova lista</h3>
+        <button type="button" class="btn-close" (click)="closeListForm()">x</button>
+      </div>
+
+      <form (ngSubmit)="createList()" #newListForm="ngForm" class="edit-form">
+        <div class="form-group">
+          <label for="giftTitle">Título da lista *</label>
+          <select id="giftTitle" name="giftTitle" [(ngModel)]="listForm.giftTitle" required class="form-control">
+            <option value="">Selecione um título</option>
+            <option value="LISTA_DE_CASAMENTO">Lista de Casamento</option>
+            <option value="LISTA_DE_PRESENTE">Lista de Presente</option>
+            <option value="LISTA_DE_CASA_NOVA">Lista de Casa Nova</option>
+            <option value="LISTA_DE_15_ANOS">Lista de 15 Anos</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="coupleName">Nomes da lista *</label>
+          <input id="coupleName" name="coupleName" [(ngModel)]="listForm.coupleName" required class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="eventDate">Data do evento *</label>
+          <input id="eventDate" name="eventDate" type="date" [(ngModel)]="listForm.eventDate" required class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="coupleWhatsapp">WhatsApp</label>
+          <input id="coupleWhatsapp" name="coupleWhatsapp" [(ngModel)]="listForm.coupleWhatsapp" class="form-control">
+        </div>
+
+        <!-- Dentro do modal Nova Lista, substitui o campo storePix -->
+        <div class="form-group">
+          <label>Foto do casal</label>
+          <div class="photo-upload-area">
+            @if (listPhotoPreview()) {
+              <div class="photo-preview">
+                <img [src]="listPhotoPreview()" alt="Preview">
+                <button type="button" class="btn-remove-photo" (click)="removePhoto('create')">✕</button>
+              </div>
+            } @else {
+              <span class="photo-placeholder-upload">📷</span>
+            }
+            <div class="photo-actions">
+              <label class="btn-photo">
+                📁 Galeria
+                <input type="file" accept="image/*" style="display:none"
+                  (change)="onPhotoSelected($event, 'create')">
+              </label>
+              <label class="btn-photo">
+                📸 Câmera
+                <input type="file" accept="image/*" capture="environment" style="display:none"
+                  (change)="onCameraCapture($event, 'create')">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-outline" (click)="closeListForm()">Cancelar</button>
+          <button type="submit" class="btn-gold" [disabled]="!newListForm.form.valid || isSavingList()">
+            @if (isSavingList()) { Salvando... } @else { Criar Lista }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showStoreForm()) {
+  <div class="modal-backdrop">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h3>Configurar loja</h3>
+        <button type="button" class="btn-close" (click)="closeStoreForm()">x</button>
+      </div>
+
+      <form (ngSubmit)="saveStore()" #storeFormRef="ngForm" class="edit-form">
+        <div class="form-group">
+          <label for="storeName">Nome da loja *</label>
+          <input id="storeName" name="storeName" [(ngModel)]="storeForm.name" required class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="storePixKey">Chave PIX *</label>
+          <input id="storePixKey" name="storePixKey" [(ngModel)]="storeForm.pixKey" required class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="storeWhatsapp">WhatsApp *</label>
+          <input id="storeWhatsapp" name="storeWhatsapp" [(ngModel)]="storeForm.whatsapp" required class="form-control" placeholder="Ex: 5581999999999">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-outline" (click)="closeStoreForm()">Cancelar</button>
+          <button type="submit" class="btn-gold" [disabled]="!storeFormRef.form.valid || isSavingStore()">
+            @if (isSavingStore()) { Salvando... } @else { Salvar }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

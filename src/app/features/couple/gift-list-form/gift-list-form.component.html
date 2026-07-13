@@ -1,0 +1,107 @@
+<div class="admin-layout">
+  <header class="admin-header">
+    <div class="header-content">
+      <button (click)="goBack()" class="btn-back">← Voltar</button>
+      <h2>Minha Lista</h2>
+      <div style="width: 70px;"></div>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    
+    @if (isLoading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Carregando informações...</p>
+      </div>
+    } @else {
+      <div class="form-container">
+        
+        @if (successMessage()) {
+          <div class="alert success-alert">
+            {{ successMessage() }}
+          </div>
+        }
+
+        @if (errorMessage()) {
+          <div class="alert error-alert">
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <form (ngSubmit)="save()" #listForm="ngForm" class="edit-form">
+          
+          <div class="photo-section">
+            <div class="photo-preview" (click)="triggerFileInput()" [class.has-photo]="previewUrl || currentPhotoUrl">
+              @if (previewUrl || currentPhotoUrl) {
+                <img [src]="previewUrl || currentPhotoUrl" alt="Foto do Casal">
+                <div class="photo-overlay">
+                  <span>📷 Trocar Foto</span>
+                </div>
+              } @else {
+                <div class="photo-placeholder">
+                  <span class="icon">📷</span>
+                  <span>Adicionar Foto do Casal</span>
+                </div>
+              }
+            </div>
+            <input 
+              type="file" 
+              #fileInput 
+              (change)="onFileSelected($event)" 
+              accept="image/*"
+              capture="environment" 
+              style="display: none;"
+            >
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">Informações Principais</h3>
+            
+            <div class="form-group">
+              <label for="giftTitle">Título da Lista *</label>
+              <input type="text" id="giftTitle" name="giftTitle" [(ngModel)]="formData.giftTitle" required placeholder="Ex: Casamento João e Maria" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="coupleName">Nomes dos Noivos *</label>
+              <input type="text" id="coupleName" name="coupleName" [(ngModel)]="formData.coupleName" required placeholder="Ex: João e Maria" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="eventDate">Data do Evento *</label>
+              <input type="date" id="eventDate" name="eventDate" [(ngModel)]="formData.eventDate" required class="form-control">
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">Contatos e Pagamento</h3>
+            
+            <div class="form-group">
+              <label for="coupleWhatsapp">WhatsApp dos Noivos</label>
+              <input type="tel" id="coupleWhatsapp" name="coupleWhatsapp" [(ngModel)]="formData.coupleWhatsapp" placeholder="Ex: 11999999999" class="form-control">
+              <small>Usado para receber notificações de presentes comprados.</small>
+            </div>
+
+            <div class="form-group">
+              <label for="storePix">Chave PIX (Opcional)</label>
+              <input type="text" id="storePix" name="storePix" [(ngModel)]="formData.storePix" placeholder="E-mail, CPF ou Telefone" class="form-control">
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-gold btn-save" [disabled]="!listForm.form.valid || isSaving()">
+              @if (isSaving()) {
+                <span class="spinner-small"></span> Salvando...
+              } @else {
+                Salvar Alterações
+              }
+            </button>
+          </div>
+
+        </form>
+      </div>
+    }
+
+  </main>
+</div>

@@ -1,0 +1,184 @@
+<nav class="page-nav">
+  <button type="button" class="btn-nav" (click)="goBack()">
+    <span class="nav-icon">&#8592;</span> Voltar
+  </button>
+  <a routerLink="/" class="btn-nav">
+    <span class="nav-icon">&#8962;</span> Home
+  </a>
+</nav>
+
+<section class="dashboard-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Administrador</p>
+      <h2>Gestão de Casais</h2>
+      <p>Gerencie os acessos e vínculos dos casais cadastrados.</p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn-refresh" (click)="loadCouples()">Atualizar</button>
+      <a routerLink="/superadmin/dashboard" class="btn-gold">&#8592; Dashboard</a>
+    </div>
+  </header>
+
+  @if (successMessage()) {
+    <div class="alert success-alert">{{ successMessage() }}</div>
+  }
+  @if (errorMessage()) {
+    <div class="alert error-alert">{{ errorMessage() }}</div>
+  }
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Carregando casais...</p>
+    </div>
+  } @else if (couples().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">&#128145;</div>
+      <h3>Nenhum casal cadastrado</h3>
+      <p>Cadastre o acesso de um casal pelo Dashboard.</p>
+      <a routerLink="/superadmin/dashboard" class="btn-gold">Ir para o Dashboard</a>
+    </div>
+  } @else {
+    <div class="couples-grid">
+      @for (couple of couples(); track couple.id) {
+        <article class="couple-card">
+          <div class="couple-avatar">
+            {{ couple.username.charAt(0).toUpperCase() }}
+          </div>
+          <div class="couple-info">
+            <h4>{{ couple.username }}</h4>
+            <p class="couple-phone">&#128222; {{ couple.phoneNumber || 'Sem telefone' }}</p>
+            @if (couple.giftListId) {
+              <span class="badge badge-linked">&#10003; {{ listNameById(couple.giftListId) }}</span>
+            } @else {
+              <span class="badge badge-pending">Sem lista vinculada</span>
+            }
+          </div>
+          <div class="card-actions">
+            <button type="button" class="btn-card" (click)="openEditModal(couple)">
+              &#9998; Editar
+            </button>
+            @if (couple.giftListId) {
+              <button type="button" class="btn-card warning" (click)="openUnlinkModal(couple)">
+                &#8855; Desvincular
+              </button>
+            } @else {
+              <button type="button" class="btn-card primary" (click)="openLinkModal(couple)">
+                &#128279; Vincular lista
+              </button>
+            }
+            <button type="button" class="btn-card danger" (click)="openDeleteModal(couple)">
+              &#128465; Excluir
+            </button>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>
+
+<!-- Modal: Editar casal -->
+@if (showEditModal()) {
+  <div class="modal-backdrop">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h3>Editar acesso — {{ editingCouple()?.username }}</h3>
+        <button type="button" class="btn-close" (click)="closeEditModal()">x</button>
+      </div>
+      <form (ngSubmit)="saveEdit()" #editFormRef="ngForm" class="edit-form">
+        <div class="form-group">
+          <label for="editPhone">Telefone</label>
+          <input id="editPhone" name="editPhone" [(ngModel)]="editForm.phoneNumber"
+            class="form-control" placeholder="Ex: 5581999999999">
+        </div>
+        <div class="form-group">
+          <label for="editPassword">Nova senha <span class="muted-label">(deixe em branco para não alterar)</span></label>
+          <input id="editPassword" name="editPassword" type="password"
+            [(ngModel)]="editForm.password" class="form-control" placeholder="Nova senha">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-outline" (click)="closeEditModal()">Cancelar</button>
+          <button type="submit" class="btn-gold" [disabled]="isSavingEdit()">
+            @if (isSavingEdit()) { Salvando... } @else { Salvar }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal: Vincular lista -->
+@if (showLinkModal()) {
+  <div class="modal-backdrop">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h3>Vincular lista — {{ linkingCouple()?.username }}</h3>
+        <button type="button" class="btn-close" (click)="closeLinkModal()">x</button>
+      </div>
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label for="selectList">Lista de presentes</label>
+        <select id="selectList" class="form-control"
+          [ngModel]="selectedListId()"
+          (ngModelChange)="selectedListId.set($event)">
+          <option [ngValue]="null">Selecione uma lista</option>
+          @for (list of lists(); track list.id) {
+            <option [ngValue]="list.id">{{ list.coupleName }}</option>
+          }
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" (click)="closeLinkModal()">Cancelar</button>
+        <button type="button" class="btn-gold" [disabled]="!selectedListId() || isLinking()" (click)="saveLink()">
+          @if (isLinking()) { Vinculando... } @else { Vincular }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal: Confirmar desvincular -->
+@if (showUnlinkModal()) {
+  <div class="modal-backdrop">
+    <div class="modal-panel modal-sm">
+      <div class="modal-header">
+        <h3>Desvincular lista</h3>
+        <button type="button" class="btn-close" (click)="closeUnlinkModal()">x</button>
+      </div>
+      <p class="delete-warning">
+        Tem certeza que deseja desvincular a lista de
+        <strong>{{ coupleToUnlink()?.username }}</strong>?
+        O casal perderá acesso à lista, mas o acesso de login continuará ativo.
+      </p>
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" (click)="closeUnlinkModal()">Cancelar</button>
+        <button type="button" class="btn-warning" (click)="confirmUnlink()" [disabled]="isUnlinking()">
+          @if (isUnlinking()) { Desvinculando... } @else { Confirmar }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal: Confirmar exclusão -->
+@if (showDeleteModal()) {
+  <div class="modal-backdrop">
+    <div class="modal-panel modal-sm">
+      <div class="modal-header">
+        <h3>Excluir acesso</h3>
+        <button type="button" class="btn-close" (click)="closeDeleteModal()">x</button>
+      </div>
+      <p class="delete-warning">
+        Tem certeza que deseja excluir o acesso de
+        <strong>{{ coupleToDelete()?.username }}</strong>?
+        Essa ação não pode ser desfeita.
+      </p>
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" (click)="closeDeleteModal()">Cancelar</button>
+        <button type="button" class="btn-danger" (click)="confirmDelete()" [disabled]="isDeleting()">
+          @if (isDeleting()) { Excluindo... } @else { Confirmar exclusão }
+        </button>
+      </div>
+    </div>
+  </div>
+}

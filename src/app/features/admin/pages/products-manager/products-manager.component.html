@@ -1,0 +1,286 @@
+<nav class="page-nav">
+  <button type="button" class="btn-nav" (click)="goBack()">
+    <span class="nav-icon">&#8592;</span> Voltar
+  </button>
+</nav>
+
+<!-- DELETE CONFIRM -->
+@if (showDeleteConfirm()) {
+  <div class="modal-backdrop">
+    <div class="modal-panel modal-sm">
+      <div class="modal-header">
+        <h3>Excluir produto</h3>
+        <button type="button" class="btn-close" (click)="cancelDelete()">✕</button>
+      </div>
+      <p class="delete-warning">
+        Tem certeza que deseja excluir <strong>{{ productToDelete()?.name }}</strong>?
+        Essa ação não pode ser desfeita.
+      </p>
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" (click)="cancelDelete()">Cancelar</button>
+        <button type="button" class="btn-danger" (click)="deleteProduct()" [disabled]="isDeleting()">
+          @if (isDeleting()) { Excluindo... } @else { Confirmar exclusão }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- PRODUCT DETAIL MODAL -->
+@if (showDetailModal() && selectedProduct()) {
+  <div class="modal-backdrop" (click)="closeDetail()">
+    <div class="modal-panel modal-detail" (click)="$event.stopPropagation()">
+      <button type="button" class="btn-close detail-close" (click)="closeDetail()">✕</button>
+
+      <div class="detail-photo-wrap">
+        @if (selectedProduct()!.photoUrl) {
+          <img [src]="selectedProduct()!.photoUrl" [alt]="selectedProduct()!.name" class="detail-photo">
+        } @else {
+          <div class="detail-photo-placeholder">🎁</div>
+        }
+      </div>
+
+      <div class="detail-body">
+        <span class="detail-status-badge" [class]="statusClass(selectedProduct()!)">
+          {{ statusLabel(selectedProduct()!) }}
+        </span>
+
+        <h2 class="detail-name">{{ selectedProduct()!.name }}</h2>
+        <p class="detail-price">R$ {{ selectedProduct()!.price | number:'1.2-2' }}</p>
+
+        @if (selectedProduct()!.description) {
+          <p class="detail-desc">{{ selectedProduct()!.description }}</p>
+        }
+
+        <div class="detail-qty-row">
+          <span class="detail-qty-label">Quantidade total</span>
+          <span class="detail-qty-value">{{ selectedProduct()!.quantity }}</span>
+        </div>
+        <div class="detail-qty-row">
+          <span class="detail-qty-label">Disponível</span>
+          <span class="detail-qty-value">{{ selectedProduct()!.availableQuantity ?? selectedProduct()!.quantity }}</span>
+        </div>
+        <div class="detail-progress-wrap">
+          <div class="detail-progress-bar">
+            <div class="detail-progress-fill"
+              [style.width.%]="((selectedProduct()!.quantity - (selectedProduct()!.availableQuantity ?? selectedProduct()!.quantity)) / selectedProduct()!.quantity) * 100">
+            </div>
+          </div>
+          <span class="detail-progress-label">
+            {{ selectedProduct()!.quantity - (selectedProduct()!.availableQuantity ?? selectedProduct()!.quantity) }}
+            de {{ selectedProduct()!.quantity }} reservados
+          </span>
+        </div>
+
+        <div class="detail-actions">
+          <button type="button" class="btn-outline" (click)="openEditProduct(selectedProduct()!); closeDetail()">
+            ✏️ Editar produto
+          </button>
+          <button type="button" class="btn-danger-outline" (click)="closeDetail(); confirmDeleteProduct(selectedProduct()!)">
+            🗑 Excluir
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- PRODUCT FORM MODAL -->
+@if (showProductForm()) {
+  <div class="modal-backdrop">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h3>{{ editingProductId() ? 'Editar produto' : 'Novo produto' }}</h3>
+        <button type="button" class="btn-close" (click)="closeProductForm()">✕</button>
+      </div>
+
+      <form (ngSubmit)="saveProduct()" class="edit-form">
+
+        <!-- FOTO -->
+        <div class="form-group">
+          <label>Foto do produto</label>
+          <div class="photo-upload-area">
+            @if (productPhotoPreview()) {
+              <div class="photo-preview">
+                <img [src]="productPhotoPreview()!" alt="Preview">
+                <button type="button" class="btn-remove-photo" (click)="removePhoto()">✕</button>
+              </div>
+            } @else {
+              <span class="photo-placeholder-upload">📷</span>
+            }
+            <div class="photo-actions">
+              <label class="btn-photo">
+                📁 Galeria
+                <input type="file" accept="image/*" style="display:none" (change)="onPhotoSelected($event)">
+              </label>
+              <label class="btn-photo">
+                📸 Câmera
+                <input type="file" accept="image/*" capture="environment" style="display:none" (change)="onPhotoSelected($event)">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Nome do produto *</label>
+          <input class="form-control" [(ngModel)]="productForm.name" name="name" required placeholder="Ex: Batedeira Planetária">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Preço (R$) *</label>
+            <input class="form-control" type="number" min="0" step="0.01"
+              [(ngModel)]="productForm.price" name="price" required placeholder="0,00">
+          </div>
+          <div class="form-group">
+            <label>Quantidade *</label>
+            <input class="form-control" type="number" min="1"
+              [(ngModel)]="productForm.quantity" name="quantity" required placeholder="1">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Descrição</label>
+          <textarea class="form-control" [(ngModel)]="productForm.description" name="description"
+            rows="3" placeholder="Detalhes sobre o produto, cor, tamanho..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-outline" (click)="closeProductForm()">Cancelar</button>
+          <button type="submit" class="btn-gold" [disabled]="isSavingProduct()">
+            @if (isUploadingPhoto()) { Enviando foto... }
+            @else if (isSavingProduct()) { Salvando... }
+            @else { {{ editingProductId() ? 'Salvar alterações' : 'Adicionar produto' }} }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- MAIN PAGE -->
+<section class="list-view-page">
+
+  <!-- LIST HEADER -->
+  @if (list()) {
+    <div class="list-hero">
+      <div class="list-hero-photo">
+        @if (list()!.photoUrl || list()!.couplePhotoUrl) {
+          <img [src]="list()!.photoUrl || list()!.couplePhotoUrl" [alt]="list()!.coupleName">
+        } @else {
+          <span class="hero-initial">{{ list()!.coupleName.charAt(0).toUpperCase() }}</span>
+        }
+      </div>
+      <div class="list-hero-info">
+        <span class="eyebrow">Lista de presentes</span>
+        <h2>{{ list()!.coupleName }}</h2>
+        <p class="hero-date">📅 {{ list()!.eventDate | date:'dd/MM/yyyy' }}</p>
+        @if (list()!.coupleWhatsapp) {
+          <p class="hero-whatsapp">💬 {{ list()!.coupleWhatsapp }}</p>
+        }
+      </div>
+      <div class="list-hero-stats">
+        <div class="stat-box">
+          <span class="stat-number">{{ products().length }}</span>
+          <span class="stat-label">presentes</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-number">
+            {{ products().filter(p => (p.availableQuantity ?? p.quantity) === 0).length }}
+          </span>
+          <span class="stat-label">reservados</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="alert success-alert">{{ successMessage() }}</div>
+  }
+  @if (errorMessage()) {
+    <div class="alert error-alert">{{ errorMessage() }}</div>
+  }
+
+  <!-- PRODUCTS SECTION -->
+  <div class="products-section">
+    <div class="section-header">
+      <div class="filter-tabs">
+        <button class="filter-tab" [class.active]="activeFilter() === 'all'" (click)="setFilter('all')">
+          Todos <span class="filter-count">{{ products().length }}</span>
+        </button>
+        <button class="filter-tab" [class.active]="activeFilter() === 'available'" (click)="setFilter('available')">
+          Disponíveis <span class="filter-count">{{ products().filter(p => (p.availableQuantity ?? p.quantity) > 0).length }}</span>
+        </button>
+        <button class="filter-tab" [class.active]="activeFilter() === 'reserved'" (click)="setFilter('reserved')">
+          Reservados <span class="filter-count">{{ products().filter(p => (p.availableQuantity ?? p.quantity) === 0).length }}</span>
+        </button>
+      </div>
+      <button type="button" class="btn-gold" (click)="openProductForm()">+ Novo produto</button>
+    </div>
+
+    @if (isLoadingProducts()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Carregando produtos...</p>
+      </div>
+    } @else if (filteredProducts.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🎁</div>
+        <h3>Nenhum produto aqui</h3>
+        <p>{{ activeFilter() === 'all' ? 'Adicione o primeiro presente à lista.' : 'Nenhum produto nesta categoria.' }}</p>
+        @if (activeFilter() === 'all') {
+          <button type="button" class="btn-gold" (click)="openProductForm()">Adicionar produto</button>
+        }
+      </div>
+    } @else {
+      <div class="products-grid">
+        @for (product of filteredProducts; track product.id) {
+          <article class="product-card">
+            <div class="product-photo" (click)="openDetail(product)">
+              @if (product.photoUrl) {
+                <img [src]="product.photoUrl" [alt]="product.name">
+              } @else {
+                <span class="product-photo-placeholder">🎁</span>
+              }
+              <span class="product-status-chip" [class]="statusClass(product)">
+                {{ statusLabel(product) }}
+              </span>
+            </div>
+
+            <div class="product-info">
+              <h4 class="product-name" (click)="openDetail(product)">{{ product.name }}</h4>
+              <p class="product-price">R$ {{ product.price | number:'1.2-2' }}</p>
+
+              @if (product.description) {
+                <p class="product-desc">{{ product.description }}</p>
+              }
+
+              <div class="product-qty-row">
+                <div class="qty-progress">
+                  <div class="qty-progress-fill"
+                    [style.width.%]="((product.quantity - (product.availableQuantity ?? product.quantity)) / product.quantity) * 100">
+                  </div>
+                </div>
+                <span class="qty-label">
+                  {{ product.quantity - (product.availableQuantity ?? product.quantity) }}/{{ product.quantity }}
+                </span>
+              </div>
+            </div>
+
+            <div class="product-actions">
+              <button type="button" class="btn-card" (click)="openDetail(product)">
+                👁 Ver
+              </button>
+              <button type="button" class="btn-card" (click)="openEditProduct(product)">
+                ✏️ Editar
+              </button>
+              <button type="button" class="btn-card danger" (click)="confirmDeleteProduct(product)">
+                🗑 Excluir
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </div>
+</section>

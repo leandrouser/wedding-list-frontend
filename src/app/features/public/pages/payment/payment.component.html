@@ -1,0 +1,82 @@
+<div class="container">
+  <!-- Top Bar -->
+  <div class="top-nav">
+    <button (click)="cancel()" class="btn-back">
+      <span>←</span> Voltar
+    </button>
+    <div class="top-nav-title">Pagamento</div>
+  </div>
+
+  <main class="content-padding flex-grow payment-main">
+    
+    <!-- State: Loading -->
+    @if (step() === 'loading') {
+      <div class="loader-container">
+        <div class="spinner"></div>
+        <h3 class="status-title">Processando</h3>
+        <p class="status-subtitle">Gerando link seguro de pagamento com o Mercado Pago...</p>
+      </div>
+    }
+
+    <!-- State: Error -->
+    @if (step() === 'error') {
+      <div class="status-container">
+        <div class="icon-wrapper error">
+          <span>⚠</span>
+        </div>
+        <h3 class="status-title error-text">Ocorreu um Erro</h3>
+        <p class="status-subtitle">{{ errorMessage() }}</p>
+        
+        <div class="action-buttons">
+          @if (product) {
+            <button (click)="createPreference()" class="btn-gold">Tentar Novamente</button>
+          } @else {
+            <button (click)="cancel()" class="btn-outline">Voltar ao Início</button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- State: Ready to Pay -->
+    @if (step() === 'ready' && product) {
+      <div class="status-container ready-state">
+        <div class="icon-wrapper success">
+          <span>🛍️</span>
+        </div>
+        
+        <h3 class="status-title">Tudo Pronto!</h3>
+        <p class="status-subtitle">Confira os detalhes abaixo e clique para pagar com segurança via Mercado Pago.</p>
+        
+        <div class="receipt-card">
+          <div class="receipt-row">
+            <span class="receipt-label">Presente</span>
+            <span class="receipt-value">{{ product.name }}</span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">Quantidade</span>
+            <span class="receipt-value">{{ quantity }}x</span>
+          </div>
+          <div class="receipt-row total-row">
+            <span class="receipt-label">Total</span>
+            <span class="receipt-value highlight">{{ (product.price * quantity) | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button (click)="pay()" class="btn-mp">
+            <span class="mp-icon">💳</span> Pagar com Mercado Pago ➔
+          </button>
+          
+          @if (coupleWhatsapp) {
+            <button (click)="notifyCouple()" class="btn-wpp">
+              <span class="wpp-icon">💬</span> Avisar Noivos no WhatsApp
+            </button>
+          }
+          
+          <button (click)="cancel()" class="btn-outline cancel-btn">Cancelar</button>
+        </div>
+      </div>
+    }
+
+  </main>
+</div>

@@ -1,0 +1,192 @@
+<div class="admin-layout">
+  <header class="admin-header">
+    <div class="header-content">
+      <button (click)="goBack()" class="btn-back">← Voltar</button>
+      <h2>Presentes</h2>
+      <button (click)="openAddModal()" class="btn-add">+ Novo</button>
+    </div>
+  </header>
+
+  <main class="admin-main">
+
+    @if (isLoading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Carregando presentes...</p>
+      </div>
+    } @else if (items().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🎁</div>
+        <h3>Nenhum presente cadastrado</h3>
+        <p>Adicione os itens que seus convidados poderão presentear.</p>
+        <button (click)="openAddModal()" class="btn-gold">+ Adicionar Primeiro Presente</button>
+      </div>
+    } @else {
+      <div class="items-list">
+        @for (item of items(); track item.id) {
+          <div class="item-card">
+            <div class="item-photo">
+              @if (item.photoUrl) {
+                <img [src]="item.photoUrl" [alt]="item.name" />
+              } @else {
+                <div class="photo-placeholder">🎁</div>
+              }
+            </div>
+
+            <div class="item-info">
+              <div class="item-name">{{ item.name }}</div>
+              @if (item.description) {
+                <div class="item-desc">{{ item.description }}</div>
+              }
+              <div class="item-meta">
+                <span class="item-price">{{ item.price | currency:'BRL' }}</span>
+                <span class="item-qty">Qtd: {{ item.availableQuantity }}/{{ item.quantity }}</span>
+                <span class="status-badge" [class]="getStatusClass(item)">
+                  {{ getStatusLabel(item) }}
+                </span>
+              </div>
+            </div>
+
+            <div class="item-actions">
+              <button (click)="openEditModal(item)" class="btn-icon-edit" title="Editar">✏️</button>
+              <button (click)="openDeleteModal(item)" class="btn-icon-delete" title="Excluir">🗑️</button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+  </main>
+</div>
+
+<!-- ── Modal Criar / Editar Presente ───────────────────── -->
+@if (showItemForm()) {
+  <div class="modal-overlay" (click)="closeItemForm()">
+    <div class="modal-box modal-form" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h3>{{ editingItem() ? 'Editar presente' : 'Novo presente' }}</h3>
+        <button type="button" class="btn-close" (click)="closeItemForm()">✕</button>
+      </div>
+
+      <!-- Foto -->
+      <div class="photo-upload-area">
+        @if (previewUrl()) {
+          <div class="photo-preview">
+            <img [src]="previewUrl()!" alt="Preview" />
+            <button type="button" class="btn-remove-photo" (click)="clearPhoto()" title="Remover foto">✕</button>
+          </div>
+        } @else {
+          <div class="photo-placeholder-upload">🎁</div>
+        }
+
+        <div class="photo-actions">
+          <button type="button" class="btn-photo" (click)="triggerGallery()">
+            🖼️ Galeria
+          </button>
+          <button type="button" class="btn-photo" (click)="triggerCamera()">
+            📷 Câmera
+          </button>
+        </div>
+      </div>
+
+      @if (itemFormError()) {
+        <div class="modal-error">{{ itemFormError() }}</div>
+      }
+
+      <div class="form-group">
+        <label for="itemName">Nome do presente *</label>
+        <input
+          id="itemName"
+          name="itemName"
+          [(ngModel)]="itemForm.name"
+          class="form-control"
+          placeholder="Ex: Jogo de panelas"
+        />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="itemPrice">Preço *</label>
+          <input
+            id="itemPrice"
+            name="itemPrice"
+            type="number"
+            min="0"
+            step="0.01"
+            [(ngModel)]="itemForm.price"
+            class="form-control"
+            placeholder="0,00"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="itemQty">Quantidade</label>
+          <input
+            id="itemQty"
+            name="itemQty"
+            type="number"
+            min="1"
+            [(ngModel)]="itemForm.quantity"
+            class="form-control"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="itemDesc">Descrição</label>
+        <textarea
+          id="itemDesc"
+          name="itemDesc"
+          [(ngModel)]="itemForm.description"
+          class="form-control"
+          rows="2"
+          placeholder="Opcional"
+        ></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" (click)="closeItemForm()" [disabled]="isSavingItem()">
+          Cancelar
+        </button>
+        <button type="button" class="btn-gold" (click)="saveItem()" [disabled]="isSavingItem()">
+          @if (isSavingItem()) {
+            <span class="spinner-small"></span>
+            {{ isUploadingPhoto() ? 'Enviando foto...' : 'Salvando...' }}
+          } @else {
+            {{ editingItem() ? 'Salvar alterações' : 'Adicionar presente' }}
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ── Modal Confirmar Exclusão ─────────────────────────── -->
+@if (itemToDelete()) {
+  <div class="modal-overlay" (click)="closeDeleteModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <h3>Excluir presente?</h3>
+      <p>Tem certeza que deseja excluir <strong>{{ itemToDelete()?.name }}</strong>?
+         Esta ação não pode ser desfeita.</p>
+
+      @if (deleteError()) {
+        <div class="modal-error">{{ deleteError() }}</div>
+      }
+
+      <div class="modal-actions">
+        <button (click)="closeDeleteModal()" class="btn-outline" [disabled]="isDeleting()">
+          Cancelar
+        </button>
+        <button (click)="confirmDelete()" class="btn-danger" [disabled]="isDeleting()">
+          @if (isDeleting()) {
+            <span class="spinner-small"></span> Excluindo...
+          } @else {
+            Excluir
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

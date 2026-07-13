@@ -1,0 +1,82 @@
+<div class="admin-layout">
+  <header class="admin-header">
+    <div class="header-content">
+      <button (click)="cancel()" class="btn-back">← Cancelar</button>
+      <h2>{{ itemId ? 'Editar' : 'Novo' }} Presente</h2>
+      <div style="width: 70px;"></div>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <div class="form-container">
+      
+      @if (errorMessage()) {
+        <div class="alert error-alert">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <form (ngSubmit)="save()" #itemForm="ngForm" class="edit-form">
+        
+        <div class="photo-section">
+          <div class="photo-preview" (click)="triggerFileInput()" [class.has-photo]="previewUrl || currentPhotoUrl">
+            @if (previewUrl || currentPhotoUrl) {
+              <img [src]="previewUrl || currentPhotoUrl" alt="Foto do Presente">
+              <div class="photo-overlay">
+                <span>📷 Trocar Foto</span>
+              </div>
+            } @else {
+              <div class="photo-placeholder">
+                <span class="icon">🎁</span>
+                <span>Adicionar Imagem do Presente</span>
+              </div>
+            }
+          </div>
+          <input 
+            type="file" 
+            #fileInput 
+            (change)="onFileSelected($event)" 
+            accept="image/*"
+            style="display: none;"
+          >
+        </div>
+
+        <div class="form-section">
+          <div class="form-group">
+            <label for="name">Nome do Presente *</label>
+            <input type="text" id="name" name="name" [(ngModel)]="formData.name" required placeholder="Ex: Jogo de Panelas" class="form-control">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="price">Valor (R$) *</label>
+              <input type="number" id="price" name="price" [(ngModel)]="formData.price" required min="0.01" step="0.01" placeholder="0.00" class="form-control">
+            </div>
+
+            <div class="form-group flex-1">
+              <label for="quantity">Quantidade *</label>
+              <input type="number" id="quantity" name="quantity" [(ngModel)]="formData.quantity" required min="1" step="1" class="form-control">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Descrição (Opcional)</label>
+            <textarea id="description" name="description" [(ngModel)]="formData.description" rows="3" placeholder="Detalhes sobre o presente..." class="form-control"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" (click)="cancel()" class="btn-outline">Cancelar</button>
+          <button type="submit" class="btn-gold btn-save" [disabled]="!itemForm.form.valid || isSaving()">
+            @if (isSaving()) {
+              <span class="spinner-small"></span> Salvando...
+            } @else {
+              Salvar
+            }
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </main>
+</div>

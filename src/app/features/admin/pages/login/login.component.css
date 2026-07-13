@@ -1,0 +1,230 @@
+/* ==========================================================================
+   AGRUPAMENTO E ESTRUTURA GLOBAL (Para não ficar solto)
+   ========================================================================== */
+.login-header,
+.login-form,
+.session-alert {
+  width: 100%;
+  max-width: 420px;   /* Impede que o formulário estique na tela inteira */
+  margin-left: auto;  /* Centraliza horizontalmente na página */
+  margin-right: auto; /* Centraliza horizontalmente na página */
+  font-family: 'Instrument Sans', -apple-system, sans-serif;
+}
+
+/* ==========================================================================
+   BOTÃO VOLTAR (Canto superior esquerdo da tela)
+   ========================================================================== */
+.back-icon-link {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  color: #737373; /* zinc-500 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.back-icon-link:hover {
+  background-color: #f5f5f5; /* zinc-100 */
+  color: #171717; /* zinc-900 */
+}
+
+.back-icon-link .material-icons {
+  font-size: 22px;
+}
+
+/* ==========================================================================
+   CABEÇALHO E LOGO D'LARA
+   ========================================================================== */
+.login-header {
+  text-align: center;
+  margin-top: 60px; /* Afasta o topo para assentar o bloco na tela */
+  margin-bottom: 36px;
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.el-gift-lead-logo {
+  width: 96px;
+  height: 96px;
+  background-color: #7B1C2E; /* Vinho Imperial D'Lara */
+  border-radius: 50%;
+  padding: 16px;
+  object-fit: contain;
+  box-shadow: 0 6px 20px rgba(123, 28, 46, 0.15);
+}
+
+.login-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  color: #171717; /* zinc-900 */
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.login-header p {
+  color: #737373; /* zinc-500 */
+  font-size: 14px;
+}
+
+/* ==========================================================================
+   FORMULÁRIO E ENTRADAS DE DADOS (INPUTS)
+   ========================================================================== */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #404040; /* zinc-700 */
+}
+
+/* Envoltório para o ícone interno do input */
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  color: #a3a3a3; /* zinc-400 */
+  font-size: 20px;
+  pointer-events: none;
+}
+
+/* Input Minimalista estilo Shadcn UI */
+.form-control {
+  width: 100%;
+  padding: 14px 16px 14px 48px; /* Recuo à esquerda para não cobrir o ícone */
+  border: 1px solid #e5e5e5; /* zinc-200 */
+  border-radius: 12px;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  background-color: #ffffff;
+  color: #0a0a0a;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #171717; /* zinc-900 */
+  box-shadow: 0 0 0 1px #171717;
+}
+
+.form-control:disabled {
+  background-color: #f5f5f5; /* zinc-100 */
+  color: #a3a3a3;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   BOTÃO DE SUBMISSÃO PRINCIPAL
+   ========================================================================== */
+.login-btn {
+  width: 100%;
+  padding: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  background-color: #171717; /* zinc-900 */
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.login-btn:hover:not(:disabled) {
+  background-color: #262626; /* zinc-800 */
+}
+
+.login-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   ALERTAS E NOTIFICAÇÕES (@if)
+   ========================================================================== */
+/* Erro de credenciais inválidas */
+.error-alert {
+  background-color: #fef2f2; /* red-50 */
+  border: 1px solid #fee2e2; /* red-100 */
+  color: #7B1C2E; /* red-800 */
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.error-icon {
+  font-size: 20px;
+  color: #7B1C2E;
+}
+
+/* Alerta de sessão já ativa no sistema */
+.session-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 24px;
+  border: 1px solid #fee2e2;
+  border-radius: 12px;
+  background: #fff5f5;
+  color: #7B1C2E;
+  font-size: 13px;
+}
+
+.session-alert button {
+  border: none;
+  background: transparent;
+  color: #7B1C2E;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 13px;
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   FEEDBACK DE CARREGAMENTO (SPINNER)
+   ========================================================================== */
+.spinner-small {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(150, 10, 10, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

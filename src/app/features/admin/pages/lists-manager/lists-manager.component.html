@@ -1,0 +1,217 @@
+<div class="mobile-container">
+
+  <header class="mobile-header">
+    <div class="header-titles">
+      <span class="eyebrow">D.Lara Admin</span>
+      <h2>Listas de Presentes</h2>
+      <p>Gerencie as listas cadastradas no sistema.</p>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="btn-gold" (click)="openCreateForm()">+ Nova Lista</button>
+      <button type="button" class="btn-outline" (click)="load()">🔄 Atualizar</button>
+    </div>
+  </header>
+
+  @if (successMessage()) {
+    <div class="alert success-alert">{{ successMessage() }}</div>
+  }
+  @if (errorMessage()) {
+    <div class="alert error-alert">{{ errorMessage() }}</div>
+  }
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Carregando listas...</p>
+    </div>
+  } @else if (lists().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>Nenhuma lista cadastrada</h3>
+      <p>Toque abaixo para criar a primeira.</p>
+      <button type="button" class="btn-gold" (click)="openCreateForm()">+ Nova Lista</button>
+    </div>
+  } @else {
+    
+    <!-- LISTA CORRIDA (UMA COLUNA) -->
+    <div class="lists-mobile-stack">
+      @for (list of lists(); track list.id) {
+        <article class="list-mobile-card">
+          
+          <div class="card-main-info">
+            <div class="photo-box">
+              @if (list.photoUrl) {
+                <img [src]="list.photoUrl" [alt]="list.coupleName" />
+              } @else {
+                <span>{{ list.coupleName.charAt(0).toUpperCase() }}</span>
+              }
+            </div>
+
+            <div class="list-details">
+              <span class="tag">{{ list.giftTitle }}</span>
+              <h4>{{ list.coupleName }}</h4>
+              <p class="event-date">📅 {{ list.eventDate | date:'dd/MM/yyyy' }}</p>
+              <p class="muted">📱 WhatsApp: {{ list.coupleWhatsapp || 'Não informado' }}</p>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <a [routerLink]="['/lista', list.id]" class="btn-card link-view">Ver lista</a>
+            <button type="button" class="btn-card" (click)="openEditForm(list)">✏️ Editar</button>
+            <button type="button" class="btn-card btn-danger-outline" (click)="openDeleteModal(list)">🗑️</button>
+          </div>
+          
+        </article>
+      }
+    </div>
+  }
+</div>
+
+@if (showCreateForm()) {
+  <div class="modal-backdrop" (click)="closeCreateForm()">
+    <div class="modal-panel" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Nova lista</h3>
+        <button type="button" class="btn-close" (click)="closeCreateForm()">✕</button>
+      </div>
+
+      <div class="edit-form">
+        <div class="form-group">
+          <label>Foto do casal</label>
+          <div class="photo-upload-area">
+            @if (createPreviewUrl()) {
+              <div class="photo-preview">
+                <img [src]="createPreviewUrl()!" alt="Foto do casal" />
+                <button type="button" class="btn-remove-photo" (click)="clearPhoto('create')">✕</button>
+              </div>
+            } @else {
+              <div class="photo-placeholder-upload">💑</div>
+            }
+            <div class="photo-actions">
+              <button type="button" class="btn-photo" (click)="triggerGallery('create')">🖼️ Galeria</button>
+              <button type="button" class="btn-photo" (click)="triggerCamera('create')">📷 Câmera</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Título da lista *</label>
+          <input [(ngModel)]="createForm.giftTitle" class="form-control" placeholder="Ex: Casamento Ana & Pedro" />
+        </div>
+        <div class="form-group">
+          <label>Nomes dos noivos *</label>
+          <input [(ngModel)]="createForm.coupleName" class="form-control" placeholder="Ex: Ana e Pedro" />
+        </div>
+        <div class="form-group">
+          <label>Data do evento *</label>
+          <input type="date" [(ngModel)]="createForm.eventDate" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>WhatsApp dos noivos</label>
+          <input type="tel" [(ngModel)]="createForm.coupleWhatsapp" class="form-control" placeholder="5511999999999" />
+        </div>
+        <div class="form-group">
+          <label>Chave PIX</label>
+          <input [(ngModel)]="createForm.storePix" class="form-control" />
+        </div>
+
+        @if (errorMessage()) {
+          <div class="alert error-alert">{{ errorMessage() }}</div>
+        }
+
+        <div class="modal-actions">
+          <button type="button" class="btn-outline" (click)="closeCreateForm()">Cancelar</button>
+          <button type="button" class="btn-gold" (click)="saveCreate()" [disabled]="isSaving()">
+            {{ isSaving() ? 'Salvando...' : 'Criar Lista' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- MODAL: EDITAR LISTA -->
+@if (showEditForm()) {
+  <div class="modal-backdrop" (click)="closeEditForm()">
+    <div class="modal-panel" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Editar lista</h3>
+        <button type="button" class="btn-close" (click)="closeEditForm()">✕</button>
+      </div>
+
+      <div class="edit-form">
+        <div class="form-group">
+          <label>Foto do casal</label>
+          <div class="photo-upload-area">
+            @if (editPreviewUrl()) {
+              <div class="photo-preview">
+                <img [src]="editPreviewUrl()!" alt="Foto do casal" />
+                <button type="button" class="btn-remove-photo" (click)="clearPhoto('edit')">✕</button>
+              </div>
+            } @else {
+              <div class="photo-placeholder-upload">💑</div>
+            }
+            <div class="photo-actions">
+              <button type="button" class="btn-photo" (click)="triggerGallery('edit')">🖼️ Galeria</button>
+              <button type="button" class="btn-photo" (click)="triggerCamera('edit')">📷 Câmera</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Título da lista *</label>
+          <input [(ngModel)]="editForm.giftTitle" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Nomes dos noivos *</label>
+          <input [(ngModel)]="editForm.coupleName" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Data do evento *</label>
+          <input type="date" [(ngModel)]="editForm.eventDate" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>WhatsApp dos noivos</label>
+          <input type="tel" [(ngModel)]="editForm.coupleWhatsapp" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Chave PIX</label>
+          <input [(ngModel)]="editForm.storePix" class="form-control" />
+        </div>
+
+        @if (errorMessage()) {
+          <div class="alert error-alert">{{ errorMessage() }}</div>
+        }
+
+        <div class="modal-actions">
+          <button type="button" class="btn-outline" (click)="closeEditForm()">Cancelar</button>
+          <button type="button" class="btn-gold" (click)="saveEdit()" [disabled]="isSaving()">
+            {{ isSaving() ? 'Salvando...' : 'Salvar alterações' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- MODAL: CONFIRMAR EXCLUSÃO -->
+@if (listToDelete()) {
+  <div class="modal-backdrop" (click)="closeDeleteModal()">
+    <div class="modal-panel modal-confirm" (click)="$event.stopPropagation()">
+      <h3>Excluir lista?</h3>
+      <p>Deseja mesmo excluir a lista de <strong>{{ listToDelete()?.coupleName }}</strong>? A ação é permanente.</p>
+
+      @if (deleteError()) {
+        <div class="alert error-alert">{{ deleteError() }}</div>
+      }
+
+      <div class="modal-actions-vertical">
+        <button type="button" class="btn-danger" (click)="confirmDelete()" [disabled]="isDeleting()">
+          {{ isDeleting() ? 'Excluindo...' : 'Sim, Excluir' }}
+        </button>
+        <button type="button" class="btn-outline" (click)="closeDeleteModal()" [disabled]="isDeleting()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+}

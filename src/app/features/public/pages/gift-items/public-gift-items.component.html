@@ -1,0 +1,101 @@
+<div class="container">
+  <!-- Top Bar Navegação -->
+  <div class="top-nav">
+    <button routerLink="/" class="btn-back">
+      <span>←</span> Voltar
+    </button>
+    <div class="top-nav-title">Presentes</div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loader-container">
+      <div class="spinner"></div>
+      <p class="loader-text">Carregando lista de presentes...</p>
+    </div>
+  }
+
+  @if (errorMessage(); as error) {
+    <div class="content-padding">
+      <div class="error-card">
+        <span class="error-icon">⚠</span>
+        <p class="error-msg">{{ error }}</p>
+        <button (click)="ngOnInit()" class="btn-gold btn-retry">Tentar Novamente</button>
+      </div>
+    </div>
+  }
+
+  @if (!isLoading() && !errorMessage() && giftList(); as list) {
+    <!-- Banner do Casal -->
+    <div class="couple-banner">
+      <div class="couple-banner-overlay"></div>
+      @if (list.photoUrl) {
+        <img [src]="list.photoUrl" alt="Foto do Casal" class="banner-image" />
+      }
+      <div class="banner-info">
+        <span class="banner-tag">{{ getGiftTitleLabel(list.giftTitle) }}</span>
+        <h1 class="couple-names">{{ list.coupleName }}</h1>
+        <p class="banner-date">📅 {{ list.eventDate | date: 'dd/MM/yyyy' }}</p>
+      </div>
+    </div>
+
+    <!-- Lista de Presentes -->
+    <main class="content-padding flex-grow">
+      <div class="intro-section">
+        <h2>Escolha seu Presente</h2>
+        <p>Abaixo estão os presentes que selecionamos com muito carinho. Escolha um item clicando sobre ele.</p>
+      </div>
+
+      <div class="products-grid">
+        @for (product of products(); track product.id) {
+          <div 
+            class="product-card" 
+            [class.purchased]="product.isPurchased" 
+            [routerLink]="['/produto', product.id]"
+            [queryParams]="{ coupleWhatsapp: list.coupleWhatsapp, giftListId: list.id }"
+          >
+            <!-- Imagem do Produto -->
+            <div class="product-image-wrapper">
+              @if (product.photoUrl) {
+                <img [src]="product.photoUrl" alt="Imagem do Presente" class="product-image" />
+              } @else {
+                <div class="product-image-placeholder">
+                  <span>🎁</span>
+                </div>
+              }
+              
+              <!-- Tag Comprado / Preço -->
+              @if (product.isPurchased) {
+                <div class="purchased-badge">Comprado</div>
+              }
+            </div>
+
+            <!-- Informações do Produto -->
+            <div class="product-info">
+              <h3 class="product-name">{{ product.name }}</h3>
+              
+              <div class="product-footer">
+                <span class="product-price">{{ product.price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
+                
+                <div class="product-status">
+                  @if (product.isPurchased) {
+                    <span class="status-icon success">✓</span>
+                    <span class="status-text success">Comprado</span>
+                  } @else {
+                    <span class="status-icon">📦</span>
+                    <span class="status-text">Qtd: {{ product.availableQuantity ?? product.quantity }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <span class="gift-box-icon">🎁</span>
+            <h3>Nenhum item cadastrado</h3>
+            <p>Os noivos ainda não adicionaram presentes nesta lista.</p>
+          </div>
+        }
+      </div>
+    </main>
+  }
+</div>

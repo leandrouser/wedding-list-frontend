@@ -1,0 +1,121 @@
+<div class="el-shell">
+
+  <!-- HEADER -->
+  <header class="el-header">
+    <span class="el-logo-tagline">Lista de presentes especial</span>
+  </header>
+
+  <div class="el-intro">
+    <div class="el-intro-icon-wrap">
+      <img src="assets/logo.jpeg" alt="Logo D'Lara" class="el-gift-lead-logo" />
+    </div>
+    
+    <span class="el-intro-eyebrow">Encontre a lista</span>
+    <h1 class="el-intro-title">Qual lista você<br>está procurando?</h1>
+    <p class="el-intro-desc">
+      Digite o nome para encontrar a lista e demonstrar todo o seu carinho.
+    </p>
+  </div>
+
+  <!-- BUSCA: Envelopada em form para interceptar o Enter ou clique no botão de lupa -->
+  <form class="el-search-wrap" (ngSubmit)="onSearchSubmit()">
+    <div class="el-search-field" [class.el-search-focused]="searchFocused">
+      
+      <input
+        type="text"
+        class="el-search-input"
+        placeholder="Buscar pelo nome..."
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearchChange($event)"
+        (focus)="searchFocused = true"
+        (blur)="searchFocused = false"
+        name="searchBox"
+        aria-label="Buscar pelo nome da lista"
+      />
+
+      <!-- BOTÃO DE LUPA NA DIREITA -->
+      <button type="submit" class="el-search-submit-btn" aria-label="Pesquisar">
+        <span class="material-icons">search</span>
+      </button>
+
+    </div>
+  </form>
+
+  <!-- RESULTADOS: SÓ ENTRA NO DOM SE O USUÁRIO TIVER BUSCADO -->
+  @if (showResults() || isLoading() || errorMessage()) {
+    <main class="el-results-area">
+
+      @if (isLoading()) {
+        <div class="el-loader-container">
+          <div class="el-spinner"></div>
+          <p class="el-loader-text">Buscando listas ativas...</p>
+        </div>
+      }
+
+      @if (errorMessage(); as error) {
+        <div class="el-error-card">
+          <span class="material-icons el-error-icon">warning_amber</span>
+          <p class="el-error-msg">{{ error }}</p>
+          <button class="el-btn-retry" (click)="onSearchSubmit()">
+            <span class="material-icons">refresh</span>
+            Tentar novamente
+          </button>
+        </div>
+      }
+
+      @if (!isLoading() && !errorMessage()) {
+        <p class="el-results-label">
+          {{ filteredLists().length }} resultado{{ filteredLists().length !== 1 ? 's' : '' }} encontrado{{ filteredLists().length !== 1 ? 's' : '' }}
+        </p>
+
+        <div class="el-list-container">
+          @for (list of filteredLists(); track list.id) {
+            <div class="el-list-card" [routerLink]="['/lista', list.id]">
+
+              <div class="el-photo-ring">
+                <div class="el-photo-inner">
+                  @if (list.photoUrl) {
+                    <img [src]="list.photoUrl" alt="Foto do casal" class="el-couple-photo" />
+                  } @else {
+                    <span class="material-icons el-photo-icon">favorite</span>
+                  }
+                </div>
+              </div>
+
+              <div class="el-card-info">
+                <span class="el-card-badge">{{ getGiftTitleLabel(list.giftTitle) }}</span>
+                <p class="el-card-names">{{ list.coupleName }}</p>
+                <span class="el-card-date">
+                  <span class="material-icons el-date-icon">calendar_today</span>
+                  {{ list.eventDate | date:'dd/MM/yyyy' }}
+                </span>
+              </div>
+
+              <span class="material-icons el-card-arrow">chevron_right</span>
+            </div>
+
+          } @empty {
+            <div class="el-empty-state">
+              <span class="material-icons el-empty-icon">card_giftcard</span>
+              <p class="el-empty-title">Nenhuma lista encontrada</p>
+              <p class="el-empty-desc">
+                Verifique a grafia do nome ou fale com o casal para confirmar.
+              </p>
+            </div>
+          }
+        </div>
+      }
+
+    </main>
+  }
+
+  <!-- FOOTER -->
+  <footer class="el-footer">
+    <p class="el-footer-copy">© 2026 D'Lara Enxovais · Feito com amor</p>
+    <div class="el-footer-links">
+      <a [routerLink]="['/admin/dashboard']" class="el-footer-link">Acesso dos noivos</a>
+      <a [routerLink]="['/superadmin/dashboard']" class="el-footer-link">Área admin</a>
+    </div>
+  </footer>
+
+</div>

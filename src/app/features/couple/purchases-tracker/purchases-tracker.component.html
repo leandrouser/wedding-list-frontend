@@ -1,0 +1,138 @@
+<div class="admin-layout">
+  <header class="admin-header">
+    <div class="header-content">
+      <button (click)="goBack()" class="btn-back">← Voltar</button>
+      <h2>Compras Recebidas</h2>
+      <div style="width: 70px;"></div>
+    </div>
+  </header>
+
+  <main class="admin-main">
+
+    <!-- Summary cards -->
+    @if (summary()) {
+      <div class="summary-grid">
+        <div class="summary-card">
+          <span class="summary-value">{{ summary()!.total }}</span>
+          <span class="summary-label">Total</span>
+        </div>
+        <div class="summary-card card-confirmed">
+          <span class="summary-value">{{ summary()!.confirmed }}</span>
+          <span class="summary-label">Confirmadas</span>
+        </div>
+        <div class="summary-card card-pending">
+          <span class="summary-value">{{ summary()!.pending }}</span>
+          <span class="summary-label">Pendentes</span>
+        </div>
+        <div class="summary-card card-value">
+          <span class="summary-value value-small">
+            {{ summary()!.totalConfirmedValue | currency:'BRL' }}
+          </span>
+          <span class="summary-label">Total Confirmado</span>
+        </div>
+      </div>
+    }
+
+    <!-- Filtros -->
+    <div class="filter-bar">
+      <button [class.active]="activeFilter() === 'ALL'"
+              (click)="setFilter('ALL')">Todas</button>
+      <button [class.active]="activeFilter() === 'PENDING'"
+              (click)="setFilter('PENDING')">Pendentes</button>
+      <button [class.active]="activeFilter() === 'CONFIRMED'"
+              (click)="setFilter('CONFIRMED')">Confirmadas</button>
+      <button [class.active]="activeFilter() === 'CANCELLED'"
+              (click)="setFilter('CANCELLED')">Canceladas</button>
+    </div>
+
+    @if (isLoading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Carregando compras...</p>
+      </div>
+    } @else if (filteredPurchases().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">💌</div>
+        <h3>Nenhuma compra encontrada</h3>
+        <p>Quando seus convidados comprarem presentes, eles aparecerão aqui.</p>
+      </div>
+    } @else {
+      <div class="purchases-list">
+        @for (purchase of filteredPurchases(); track purchase.id) {
+          <div class="purchase-card" [class]="'status-' + (purchase.status?.toLowerCase() || 'pending')">
+
+            <div class="purchase-header">
+              <span class="guest-name">{{ purchase.guestName }}</span>
+              <span class="status-pill" [class]="'pill-' + (purchase.status?.toLowerCase() || 'pending')">
+                {{ purchase.status === 'CONFIRMED' ? 'Confirmado'
+                   : purchase.status === 'CANCELLED' ? 'Cancelado'
+                   : 'Pendente' }}
+              </span>
+            </div>
+
+            <div class="purchase-body">
+              <div class="product-info">
+                <span>🎁 <strong>{{ purchase.productName || 'Produto #' + purchase.productId }}</strong></span>
+                <span>📦 {{ purchase.quantity }} un.</span>
+                <span>📅 {{ purchase.purchaseDate | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+
+              @if (purchase.message) {
+                <div class="guest-message">"{{ purchase.message }}"</div>
+              }
+
+              <div class="guest-contact">📞 {{ purchase.guestContact }}</div>
+            </div>
+
+            <div class="purchase-footer">
+              @if (purchase.status === 'PENDING') {
+                <button (click)="confirmPurchase(purchase)" class="btn-confirm">
+                  ✅ Confirmar
+                </button>
+                <button (click)="cancelPurchase(purchase)" class="btn-cancel-action">
+                  ❌ Cancelar
+                </button>
+              }
+              @if (purchase.status === 'CANCELLED') {
+                <button (click)="openDeleteModal(purchase)" class="btn-delete-action">
+                  🗑️ Excluir
+                </button>
+              }
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+
+  </main>
+</div>
+
+<!-- Modal exclusão permanente -->
+@if (purchaseToDelete()) {
+  <div class="modal-overlay" (click)="closeDeleteModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <h3>Excluir compra?</h3>
+      <p>Excluir permanentemente a compra de
+         <strong>{{ purchaseToDelete()?.guestName }}</strong>?
+         Esta ação não pode ser desfeita.</p>
+
+      @if (actionError()) {
+        <div class="modal-error">{{ actionError() }}</div>
+      }
+
+      <div class="modal-actions">
+        <button (click)="closeDeleteModal()" class="btn-outline" [disabled]="isDeleting()">
+          Cancelar
+        </button>
+        <button (click)="confirmDelete()" class="btn-danger" [disabled]="isDeleting()">
+          @if (isDeleting()) {
+            <span class="spinner-small"></span> Excluindo...
+          } @else {
+            Excluir
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

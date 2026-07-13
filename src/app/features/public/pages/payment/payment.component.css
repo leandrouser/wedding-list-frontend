@@ -1,0 +1,221 @@
+.flex-grow {
+  flex-grow: 1;
+}
+
+/* Barra de Navegação */
+.top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background-color: #FFFFFF;
+  border-bottom: 1.5px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-dark);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+  background-color: rgba(212, 175, 55, 0.05);
+  color: var(--primary);
+}
+
+.top-nav-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+  padding-right: 50px;
+}
+
+.payment-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Container de Status (Pronto, Erro, etc) */
+.status-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.icon-wrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.icon-wrapper.success {
+  background-color: #E8F5E9;
+  color: #2E7D32;
+  border: 2px solid #C8E6C9;
+}
+
+.icon-wrapper.error {
+  background-color: #FFEBEE;
+  color: #C62828;
+  border: 2px solid #FFCDD2;
+}
+
+.status-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+
+.status-title.error-text {
+  color: #C62828;
+}
+
+.status-subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 32px;
+  padding: 0 16px;
+}
+
+/* Recibo / Resumo da Compra */
+.receipt-card {
+  width: 100%;
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--border-color);
+}
+
+.receipt-row:last-child {
+  border-bottom: none;
+}
+
+.receipt-label {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.receipt-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  text-align: right;
+  max-width: 60%;
+}
+
+.total-row {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1.5px solid var(--border-color);
+  border-bottom: none;
+}
+
+.total-row .receipt-label {
+  font-weight: 700;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.total-row .highlight {
+  font-size: 18px;
+  color: var(--primary-dark);
+}
+
+/* Botões de Ação */
+.action-buttons {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn-mp {
+  background-color: #009EE3;
+  color: #FFFFFF;
+  border: none;
+  padding: 16px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 158, 227, 0.3);
+}
+
+.btn-mp:hover {
+  background-color: #0087C1;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 158, 227, 0.4);
+}
+
+.btn-wpp {
+  background-color: #25D366;
+  color: #FFFFFF;
+  border: none;
+  padding: 16px;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);
+}
+
+.btn-wpp:hover {
+  background-color: #128C7E;
+  transform: translateY(-2px);
+}
+
+.cancel-btn {
+  margin-top: 8px;
+  border-color: transparent;
+  color: var(--text-light);
+}
+
+.cancel-btn:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+  color: var(--text-muted);
+  border-color: transparent;
+}

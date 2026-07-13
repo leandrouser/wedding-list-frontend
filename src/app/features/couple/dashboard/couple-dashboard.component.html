@@ -1,0 +1,253 @@
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="brand-icon">🎁</span>
+        <span class="brand-name">Minha Lista</span>
+      </div>
+      <button class="btn-logout" (click)="logout()">Sair</button>
+    </div>
+  </header>
+
+  <!-- Loading -->
+  <div class="state-center" *ngIf="isLoading()">
+    <div class="spinner"></div>
+    <p>Carregando sua lista…</p>
+  </div>
+
+  <!-- Error sem lista -->
+  <div class="state-center state-error" *ngIf="!isLoading() && errorMessage() && !list()">
+    <span class="state-icon">⚠️</span>
+    <p>{{ errorMessage() }}</p>
+  </div>
+
+  <!-- Conteúdo principal -->
+  <main class="main-content" *ngIf="!isLoading() && list()">
+
+    <!-- Feedback global -->
+    <div class="alert alert-success" *ngIf="successMessage()">✓ {{ successMessage() }}</div>
+    <div class="alert alert-error"   *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+    <!-- Hero da lista -->
+    <section class="list-hero">
+     <div class="hero-photo-wrap">
+      <div class="floral-frame">
+        <img class="floral-border" src="assets/borda-foto.png" alt="" aria-hidden="true"/>
+
+        <div class="couple-photo-circle">
+          <img
+            *ngIf="list()?.photoUrl"
+            [src]="list()?.photoUrl"
+            [alt]="list()?.coupleName"
+            class="couple-photo"
+          />
+          <div class="couple-photo-empty" *ngIf="!list()?.photoUrl">
+            <span>💍</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      <div class="hero-info">
+        <p class="hero-tag">{{ formatTitle(list()?.giftTitle ?? '') }}</p>
+        <h1 class="hero-title">{{ list()?.coupleName }}</h1>
+
+        <div class="hero-meta" *ngIf="list()?.eventDate">
+          <span class="meta-icon">📅</span>
+          <span>{{ list()?.eventDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <div class="hero-meta" *ngIf="list()?.coupleWhatsapp">
+          <span class="meta-icon">📱</span>
+          <span>{{ list()?.coupleWhatsapp }}</span>
+        </div>
+
+        <button class="btn-edit" (click)="openEditForm()">✏️ Editar dados</button>
+      </div>
+    </section>
+
+    <!-- Resumo -->
+    <section class="summary-bar">
+      <div class="summary-item">
+        <span class="summary-value">{{ items().length }}</span>
+        <span class="summary-label">Presentes</span>
+      </div>
+      <div class="summary-item">
+        <!-- Usa a propriedade computada do TS -->
+        <span class="summary-value">{{ purchasedCount() }}</span>
+        <span class="summary-label">Comprados</span>
+      </div>
+      <div class="summary-item">
+        <!-- Usa a propriedade computada do TS -->
+        <span class="summary-value">{{ availableCount() }}</span>
+        <span class="summary-label">Disponíveis</span>
+      </div>
+    </section>
+
+    <!-- Grid de presentes -->
+    <section class="gifts-section">
+      <h2 class="section-title">Lista de Presentes</h2>
+
+      <!-- Vazio -->
+      <div class="state-empty" *ngIf="items().length === 0">
+        <span class="state-icon">🎁</span>
+        <p>Nenhum presente cadastrado ainda.</p>
+      </div>
+
+      <div class="gifts-grid" *ngIf="items().length > 0">
+        <div
+          class="gift-card"
+          *ngFor="let item of items()"
+          [class.gift-card--purchased]="item.isPurchased"
+        >
+          <!-- Foto -->
+          <div class="gift-photo-wrap">
+            <img
+              *ngIf="item.photoUrl"
+              [src]="item.photoUrl"
+              [alt]="item.name"
+              class="gift-photo"
+            />
+            <div class="gift-photo gift-photo--empty" *ngIf="!item.photoUrl">
+              <span>🎀</span>
+            </div>
+
+            <!-- Badge de status -->
+            <span class="gift-badge" [ngClass]="getStatusClass(item)">
+              {{ getStatusLabel(item) }}
+            </span>
+          </div>
+
+          <!-- Dados -->
+          <div class="gift-body">
+            <h3 class="gift-name">{{ item.name }}</h3>
+
+            <p class="gift-description" *ngIf="item.description">
+              {{ item.description }}
+            </p>
+
+            <div class="gift-footer">
+              <span class="gift-price">
+                {{ item.price | currency:'BRL':'symbol':'1.2-2' }}
+              </span>
+
+              <div class="gift-qty">
+                <span class="qty-label">Qtd.</span>
+                <span class="qty-available">{{ item.availableQuantity ?? item.quantity }}</span>
+                <span class="qty-sep">/</span>
+                <span class="qty-total">{{ item.quantity }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     Modal — Editar dados da lista
+════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="showEditForm()" (click)="closeEditForm()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <header class="modal-header">
+      <h2 class="modal-title">Editar dados da lista</h2>
+      <button class="modal-close" (click)="closeEditForm()" aria-label="Fechar">✕</button>
+    </header>
+
+    <div class="modal-body">
+
+      <!-- Foto -->
+      <div class="photo-editor">
+        <div class="photo-preview-wrap">
+          <img
+            *ngIf="editPhotoPreview()"
+            [src]="editPhotoPreview()!"
+            alt="Foto do casal"
+            class="photo-preview"
+          />
+          <div class="photo-preview photo-preview--empty" *ngIf="!editPhotoPreview()">
+            <span>📷</span>
+          </div>
+        </div>
+
+        <div class="photo-actions">
+          <label class="btn-photo-action" for="photoFile">
+            🖼️ Galeria
+            <input
+              id="photoFile"
+              type="file"
+              accept="image/*"
+              class="input-hidden"
+              (change)="onPhotoSelected($event)"
+            />
+          </label>
+
+          <label class="btn-photo-action" for="cameraFile">
+            📷 Câmera
+            <input
+              id="cameraFile"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              class="input-hidden"
+              (change)="onCameraCapture($event)"
+            />
+          </label>
+
+          <button
+            class="btn-photo-action btn-photo-action--danger"
+            *ngIf="editPhotoPreview()"
+            type="button"
+            (click)="removePhoto()"
+          >
+            🗑️ Remover
+          </button>
+        </div>
+      </div>
+
+      <!-- Campos -->
+      <div class="form-group">
+        <label class="form-label" for="coupleName">Nome do casal / evento</label>
+        <input
+          id="coupleName"
+          class="form-input"
+          type="text"
+          [(ngModel)]="editForm.coupleName"
+          placeholder="Ex.: Ana &amp; João"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="coupleWhatsapp">WhatsApp para contato</label>
+        <input
+          id="coupleWhatsapp"
+          class="form-input"
+          type="tel"
+          [(ngModel)]="editForm.coupleWhatsapp"
+          placeholder="(81) 9 9999-9999"
+        />
+      </div>
+
+    </div>
+
+    <footer class="modal-footer">
+      <button class="btn-secondary" type="button" (click)="closeEditForm()">Cancelar</button>
+      <button
+        class="btn-primary"
+        type="button"
+        (click)="saveEdit()"
+        [disabled]="isSavingEdit()"
+      >
+        <span *ngIf="!isSavingEdit()">Salvar alterações</span>
+        <span *ngIf="isSavingEdit()">Salvando…</span>
+      </button>
+    </footer>
+
+  </div>
+</div>

@@ -1,0 +1,77 @@
+  <a routerLink="/public" class="back-icon-link" aria-label="Voltar para Área Pública">
+    <span class="material-icons">arrow_back</span>
+  </a>
+  
+  <!-- HEADER COM A LOGO PREMIUM DA MARCA -->
+  <div class="login-header">
+    <div class="logo-container">
+      <img src="assets/logo.jpeg" alt="Logo D'Lara" class="el-gift-lead-logo" />
+    </div>
+    <h2>Área de Autenticação</h2>
+    <p>Gerencie sua lista de presentes e compras.</p>
+  </div>
+
+  <!-- ALERTA DE SESSÃO ATIVA -->
+  @if (hasActiveSession()) {
+    <div class="session-alert">
+      <span>Existe uma sessão ativa.</span>
+      <button type="button" (click)="logoutCurrentSession()">Sair para fazer outro login</button>
+    </div>
+  }
+
+  <!-- FORMULÁRIO DE LOGIN -->
+  <form (ngSubmit)="login()" #loginForm="ngForm" class="login-form">
+    
+    @if (errorMessage()) {
+      <div class="error-alert">
+        <span class="material-icons error-icon">warning_amber</span>
+        <p>{{ errorMessage() }}</p>
+      </div>
+    }
+
+    <!-- CAMPO: USUÁRIO -->
+    <div class="form-group">
+      <label for="username">Usuário (Login)</label>
+      <div class="input-with-icon">
+        <span class="material-icons input-icon">person</span>
+        <input 
+          type="text" 
+          id="username" 
+          name="username" 
+          [(ngModel)]="username" 
+          required 
+          placeholder="Ex: João Silva"
+          class="form-control"
+          [disabled]="isLoading()"
+        >
+      </div>
+    </div>
+
+    <!-- CAMPO: SENHA -->
+    <div class="form-group">
+      <label for="password">Senha</label>
+      <div class="input-with-icon">
+        <span class="material-icons input-icon">lock</span>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          [(ngModel)]="password" 
+          required 
+          placeholder="Sua senha secreta"
+          class="form-control"
+          [disabled]="isLoading()"
+        >
+      </div>
+    </div>
+
+    <!-- BOTÃO DE SUBMISSÃO -->
+    <button type="submit" class="login-btn" [disabled]="!loginForm.form.valid || isLoading()">
+      @if (isLoading()) {
+        <span class="spinner-small"></span> Entrando...
+      } @else {
+        Entrar
+      }
+    </button>
+
+  </form>
