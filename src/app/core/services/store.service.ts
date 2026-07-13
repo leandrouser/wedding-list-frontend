@@ -16,7 +16,7 @@ export class StoreService {
   private readonly baseUrl = ApiConfig.baseUrl;
 
   getMyStore(): Observable<Store> {
-    return this.http.get<Store>(`${this.baseUrl}/stores/me`);
+    return this.http.get<Store>(`${this.baseUrl}/stores`);
   }
 
   saveOrUpdate(data: Store): Observable<Store> {

@@ -183,7 +183,7 @@ p {
 
 .lists-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
   gap: 20px;
 }
 
@@ -491,6 +491,9 @@ select.form-control {
 }
 
 @media (max-width: 720px) {
+  .lists-grid{
+    grid-template-columns: 1fr;
+  }
   .dashboard-page {
     padding: 20px 16px 40px;
   }
@@ -525,6 +528,7 @@ select.form-control {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 20px;
 }
