@@ -130,8 +130,6 @@
   box-shadow: var(--shadow);
 }
 
-/* ── Floral frame ──────────────────────────────────────── */
-/* ── Floral frame ──────────────────────────────────────── */
 .hero-photo-wrap {
   flex-shrink: 0;
 }
@@ -139,7 +137,7 @@
 .floral-frame {
   position: relative;
   width: 320px;
-  aspect-ratio: 1152 / 720; /* mesma proporção do PNG da moldura */
+  aspect-ratio: 1152 / 720;
 }
 
 .floral-border {

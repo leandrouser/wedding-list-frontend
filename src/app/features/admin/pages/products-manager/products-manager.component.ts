@@ -25,7 +25,6 @@ export class ProductsManagerComponent implements OnInit {
   protected errorMessage = signal<string | null>(null);
   protected successMessage = signal<string | null>(null);
 
-  // Product form
   protected showProductForm = signal(false);
   protected isSavingProduct = signal(false);
   protected editingProductId = signal<number | null>(null);
@@ -41,16 +40,13 @@ export class ProductsManagerComponent implements OnInit {
     photoUrl: ''
   };
 
-  // Delete
   protected showDeleteConfirm = signal(false);
   protected productToDelete = signal<GiftItem | null>(null);
   protected isDeleting = signal(false);
 
-  // Detail modal
   protected showDetailModal = signal(false);
   protected selectedProduct = signal<GiftItem | null>(null);
 
-  // Filter
   protected activeFilter = signal<'all' | 'available' | 'reserved'>('all');
 
   protected get listId(): number {
@@ -68,6 +64,10 @@ export class ProductsManagerComponent implements OnInit {
         return all;
     }
   }
+
+   protected showPhotoLightbox = signal(false);
+    protected lightboxPhotoUrl = signal<string | null>(null);
+    protected lightboxPhotoAlt = signal<string>('');
 
   ngOnInit(): void {
     this.loadList();
@@ -227,6 +227,19 @@ export class ProductsManagerComponent implements OnInit {
     this.showDetailModal.set(true);
   }
 
+  openPhotoLightbox(product: GiftItem, event: Event): void {
+    event.stopPropagation();
+    if (!product.photoUrl) return;
+    this.lightboxPhotoUrl.set(product.photoUrl);
+    this.lightboxPhotoAlt.set(product.name);
+    this.showPhotoLightbox.set(true);
+  }
+
+  closePhotoLightbox(): void {
+    this.showPhotoLightbox.set(false);
+    this.lightboxPhotoUrl.set(null);
+  }
+
   closeDetail(): void {
     this.showDetailModal.set(false);
     this.selectedProduct.set(null);
@@ -252,5 +265,10 @@ export class ProductsManagerComponent implements OnInit {
 
   goBack(): void {
     this.location.back();
+  }
+
+    selectAllOnFocus(event: FocusEvent): void {
+    const input = event.target as HTMLInputElement;
+    input.select();
   }
 }
