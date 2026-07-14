@@ -20,18 +20,13 @@ export class PublicGiftListsComponent implements OnInit {
   protected readonly isLoading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   
-  // O SEGREDO: Sinal que controla se a área de resultados deve ser exibida
   protected readonly showResults = signal(false);
 
   searchFocused = false;
   
   ngOnInit(): void {
-    // REMOVIDO: this.loadLists() não roda mais na inicialização da página.
   }
 
-  /**
-   * Método disparado exclusivamente ao submeter o formulário de busca
-   */
   onSearchSubmit(): void {
     const term = this.searchTerm().toLowerCase().trim();
     
@@ -41,7 +36,6 @@ export class PublicGiftListsComponent implements OnInit {
       return;
     }
 
-    // Se as listas principais já estiverem no estado local, evitamos requisições repetidas
     if (this.giftLists().length > 0) {
       this.applyFilter(term);
       this.showResults.set(true);
@@ -77,7 +71,6 @@ export class PublicGiftListsComponent implements OnInit {
     this.filteredLists.set(filtered);
   }
 
-  // Permite que o estado resete caso o usuário limpe o campo completamente
   onSearchChange(term: string): void {
     this.searchTerm.set(term);
     if (!term.trim()) {

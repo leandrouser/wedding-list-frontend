@@ -1,5 +1,4 @@
 <div class="container">
-  <!-- Top Bar Navegação -->
   <div class="top-nav">
     <button routerLink="/" class="btn-back">
       <span>←</span> Voltar
@@ -25,12 +24,23 @@
   }
 
   @if (!isLoading() && !errorMessage() && giftList(); as list) {
-    <!-- Banner do Casal -->
     <div class="couple-banner">
-      <div class="couple-banner-overlay"></div>
-      @if (list.photoUrl) {
-        <img [src]="list.photoUrl" alt="Foto do Casal" class="banner-image" />
-      }
+      <div class="photo-frame">
+        <div class="photo-frame-photo">
+            @if (list.photoUrl && list.photoUrl.trim().length > 0) {
+              <img
+                [src]="list.photoUrl"
+                alt="Foto do Casal"
+                class="banner-image"
+                (error)="onPhotoError($event)"
+              />
+            } @else {
+              <div class="photo-frame-placeholder">💍</div>
+            }
+          </div>
+        <img src="assets/moldura-floral.png" alt="" class="photo-frame-border" />
+      </div>
+
       <div class="banner-info">
         <span class="banner-tag">{{ getGiftTitleLabel(list.giftTitle) }}</span>
         <h1 class="couple-names">{{ list.coupleName }}</h1>
@@ -38,7 +48,6 @@
       </div>
     </div>
 
-    <!-- Lista de Presentes -->
     <main class="content-padding flex-grow">
       <div class="intro-section">
         <h2>Escolha seu Presente</h2>
@@ -53,7 +62,6 @@
             [routerLink]="['/produto', product.id]"
             [queryParams]="{ coupleWhatsapp: list.coupleWhatsapp, giftListId: list.id }"
           >
-            <!-- Imagem do Produto -->
             <div class="product-image-wrapper">
               @if (product.photoUrl) {
                 <img [src]="product.photoUrl" alt="Imagem do Presente" class="product-image" />
@@ -63,13 +71,11 @@
                 </div>
               }
               
-              <!-- Tag Comprado / Preço -->
               @if (product.isPurchased) {
                 <div class="purchased-badge">Comprado</div>
               }
             </div>
 
-            <!-- Informações do Produto -->
             <div class="product-info">
               <h3 class="product-name">{{ product.name }}</h3>
               

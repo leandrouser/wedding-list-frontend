@@ -3,7 +3,6 @@ import { adminGuard } from './core/guards/admin.guard';
 import { coupleGuard } from './core/guards/couple.guard';
 
 export const routes: Routes = [
-  // Acesso dos convidados
   {
     path: 'public',
     loadComponent: () => import('./features/public/pages/gift-lists/public-gift-lists.component')
@@ -35,14 +34,12 @@ export const routes: Routes = [
       .then(c => c.PaymentFailureComponent)
   },
 
-  // Login compartilhado por casal e administrador
   {
     path: 'admin/login',
     loadComponent: () => import('./features/admin/pages/login/login.component')
       .then(c => c.LoginComponent)
   },
 
-  // Acesso do casal
   {
     path: 'admin',
     canActivate: [coupleGuard],

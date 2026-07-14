@@ -74,4 +74,13 @@ export class PublicGiftItemsComponent implements OnInit {
       default: return 'Lista de Presentes';
     }
   }
+
+  onPhotoError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
+    img.insertAdjacentHTML(
+      'afterend',
+      '<div class="photo-frame-placeholder">💍</div>'
+    );
+  }
 }

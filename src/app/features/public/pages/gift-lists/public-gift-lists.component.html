@@ -1,6 +1,5 @@
 <div class="el-shell">
 
-  <!-- HEADER -->
   <header class="el-header">
     <span class="el-logo-tagline">Lista de presentes especial</span>
   </header>
@@ -17,7 +16,6 @@
     </p>
   </div>
 
-  <!-- BUSCA: Envelopada em form para interceptar o Enter ou clique no botão de lupa -->
   <form class="el-search-wrap" (ngSubmit)="onSearchSubmit()">
     <div class="el-search-field" [class.el-search-focused]="searchFocused">
       
@@ -33,7 +31,6 @@
         aria-label="Buscar pelo nome da lista"
       />
 
-      <!-- BOTÃO DE LUPA NA DIREITA -->
       <button type="submit" class="el-search-submit-btn" aria-label="Pesquisar">
         <span class="material-icons">search</span>
       </button>
@@ -41,7 +38,6 @@
     </div>
   </form>
 
-  <!-- RESULTADOS: SÓ ENTRA NO DOM SE O USUÁRIO TIVER BUSCADO -->
   @if (showResults() || isLoading() || errorMessage()) {
     <main class="el-results-area">
 
@@ -109,7 +105,6 @@
     </main>
   }
 
-  <!-- FOOTER -->
   <footer class="el-footer">
     <p class="el-footer-copy">© 2026 D'Lara Enxovais · Feito com amor</p>
     <div class="el-footer-links">

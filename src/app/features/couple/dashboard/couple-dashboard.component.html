@@ -1,6 +1,5 @@
 <div class="page-wrapper">
 
-  <!-- Header -->
   <header class="page-header">
     <div class="header-inner">
       <div class="header-brand">
@@ -11,44 +10,39 @@
     </div>
   </header>
 
-  <!-- Loading -->
   <div class="state-center" *ngIf="isLoading()">
     <div class="spinner"></div>
     <p>Carregando sua lista…</p>
   </div>
 
-  <!-- Error sem lista -->
   <div class="state-center state-error" *ngIf="!isLoading() && errorMessage() && !list()">
     <span class="state-icon">⚠️</span>
     <p>{{ errorMessage() }}</p>
   </div>
 
-  <!-- Conteúdo principal -->
   <main class="main-content" *ngIf="!isLoading() && list()">
 
-    <!-- Feedback global -->
     <div class="alert alert-success" *ngIf="successMessage()">✓ {{ successMessage() }}</div>
     <div class="alert alert-error"   *ngIf="errorMessage()">{{ errorMessage() }}</div>
 
-    <!-- Hero da lista -->
     <section class="list-hero">
-     <div class="hero-photo-wrap">
-      <div class="floral-frame">
-        <img class="floral-border" src="assets/borda-foto.png" alt="" aria-hidden="true"/>
+      <div class="hero-photo-wrap">
+        <div class="floral-frame">
+          <img class="floral-border" src="assets/moldura-floral.png" alt="" aria-hidden="true" />
 
-        <div class="couple-photo-circle">
-          <img
-            *ngIf="list()?.photoUrl"
-            [src]="list()?.photoUrl"
-            [alt]="list()?.coupleName"
-            class="couple-photo"
-          />
-          <div class="couple-photo-empty" *ngIf="!list()?.photoUrl">
-            <span>💍</span>
+          <div class="couple-photo-circle">
+            <img
+              *ngIf="list()?.photoUrl"
+              [src]="list()?.photoUrl"
+              [alt]="list()?.coupleName"
+              class="couple-photo"
+            />
+            <div class="couple-photo-empty" *ngIf="!list()?.photoUrl">
+              <span>💍</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
       <div class="hero-info">
         <p class="hero-tag">{{ formatTitle(list()?.giftTitle ?? '') }}</p>
@@ -68,29 +62,24 @@
       </div>
     </section>
 
-    <!-- Resumo -->
     <section class="summary-bar">
       <div class="summary-item">
         <span class="summary-value">{{ items().length }}</span>
         <span class="summary-label">Presentes</span>
       </div>
       <div class="summary-item">
-        <!-- Usa a propriedade computada do TS -->
         <span class="summary-value">{{ purchasedCount() }}</span>
         <span class="summary-label">Comprados</span>
       </div>
       <div class="summary-item">
-        <!-- Usa a propriedade computada do TS -->
         <span class="summary-value">{{ availableCount() }}</span>
         <span class="summary-label">Disponíveis</span>
       </div>
     </section>
 
-    <!-- Grid de presentes -->
     <section class="gifts-section">
       <h2 class="section-title">Lista de Presentes</h2>
 
-      <!-- Vazio -->
       <div class="state-empty" *ngIf="items().length === 0">
         <span class="state-icon">🎁</span>
         <p>Nenhum presente cadastrado ainda.</p>
@@ -102,7 +91,6 @@
           *ngFor="let item of items()"
           [class.gift-card--purchased]="item.isPurchased"
         >
-          <!-- Foto -->
           <div class="gift-photo-wrap">
             <img
               *ngIf="item.photoUrl"
@@ -114,13 +102,11 @@
               <span>🎀</span>
             </div>
 
-            <!-- Badge de status -->
             <span class="gift-badge" [ngClass]="getStatusClass(item)">
               {{ getStatusLabel(item) }}
             </span>
           </div>
 
-          <!-- Dados -->
           <div class="gift-body">
             <h3 class="gift-name">{{ item.name }}</h3>
 
@@ -149,9 +135,6 @@
 
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     Modal — Editar dados da lista
-════════════════════════════════════════════════════════════ -->
 <div class="modal-overlay" *ngIf="showEditForm()" (click)="closeEditForm()">
   <div class="modal" (click)="$event.stopPropagation()">
 
@@ -162,7 +145,6 @@
 
     <div class="modal-body">
 
-      <!-- Foto -->
       <div class="photo-editor">
         <div class="photo-preview-wrap">
           <img
@@ -211,7 +193,6 @@
         </div>
       </div>
 
-      <!-- Campos -->
       <div class="form-group">
         <label class="form-label" for="coupleName">Nome do casal / evento</label>
         <input
