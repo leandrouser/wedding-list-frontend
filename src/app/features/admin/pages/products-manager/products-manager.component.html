@@ -168,6 +168,62 @@
   </div>
 }
 
+<!-- PURCHASES / RESERVATIONS MODAL -->
+@if (showPurchasesModal()) {
+  <div class="modal-backdrop" (click)="closePurchasesModal()">
+    <div class="modal-panel modal-purchases" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Reservas — {{ selectedProduct()?.name }}</h3>
+        <button type="button" class="btn-close" (click)="closePurchasesModal()">✕</button>
+      </div>
+
+      @if (purchasesModalError()) {
+        <div class="alert error-alert">{{ purchasesModalError() }}</div>
+      }
+
+      @if (isLoadingPurchases()) {
+        <div class="loading-state loading-state-sm">
+          <div class="spinner"></div>
+          <p>Carregando reservas...</p>
+        </div>
+      } @else if (purchasesForProduct().length === 0) {
+        <div class="empty-state empty-state-sm">
+          <p>Nenhuma reserva ativa para este produto.</p>
+        </div>
+      } @else {
+        <div class="purchases-list">
+            @for (purchase of purchasesForProduct(); track purchase.id ?? $index) {
+              <div class="purchase-row">
+              <div class="purchase-info">
+                <span class="purchase-status-chip" [class]="'status-' + (purchase.status?.toLowerCase() ?? 'pending')">
+                  {{ purchase.status === 'CONFIRMED' ? 'Pago' : 'Pendente' }}
+                </span>
+                <p class="purchase-guest">{{ purchase.guestName }}</p>
+                <p class="purchase-meta">{{ purchase.guestContact }} · {{ purchase.quantity }}x</p>
+                @if (purchase.message) {
+                  <p class="purchase-message">"{{ purchase.message }}"</p>
+                }
+              </div>
+
+              @if (purchase.status === 'PENDING') {
+                <button
+                  type="button"
+                  class="btn-card danger"
+                  [disabled]="cancellingPurchaseId() === purchase.id"
+                  (click)="cancelReservation(purchase)">
+                  {{ cancellingPurchaseId() === purchase.id ? 'Liberando...' : 'Cancelar e liberar' }}
+                </button>
+              } @else {
+                <span class="purchase-locked-note">Pagamento confirmado — não pode ser cancelado aqui</span>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}
+
 <!-- MAIN PAGE -->
 <section class="list-view-page">
 
@@ -209,6 +265,16 @@
   }
   @if (errorMessage()) {
     <div class="alert error-alert">{{ errorMessage() }}</div>
+  }
+
+  <!-- PHOTO EDITOR -->
+  @if (showPhotoEditor() && rawFileForEdit()) {
+    <app-photo-editor
+      [imageFile]="rawFileForEdit()!"
+      [aspectRatio]="4/3"
+      (imageCropped)="onPhotoEditConfirmed($event)"
+      (cancelled)="onPhotoEditCancelled()">
+    </app-photo-editor>
   }
 
   <!-- PRODUCTS SECTION -->
@@ -284,6 +350,11 @@
               <button type="button" class="btn-card" (click)="openEditProduct(product)">
                 ✏️ Editar
               </button>
+              @if ((product.availableQuantity ?? product.quantity) < product.quantity) {
+                <button type="button" class="btn-card btn-release" (click)="openPurchasesModal(product)">
+                  🔓 Liberar
+                </button>
+              }
               <button type="button" class="btn-card danger" (click)="confirmDeleteProduct(product)">
                 🗑 Excluir
               </button>

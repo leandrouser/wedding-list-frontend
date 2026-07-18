@@ -120,8 +120,8 @@
   border: 1px solid #e5e5e5; /* zinc-200 */
   border-radius: 12px;
   /* Removemos o padding da direita para o botão encostar na borda se necessário */
-  padding-left: 16px; 
-  padding-right: 4px; 
+  padding-left: 16px;
+  padding-right: 4px;
   transition: all 0.2s ease;
 }
 
@@ -165,11 +165,12 @@
 }
 
 .el-gift-lead-logo {
-  width: 100px;
-  height: 64px;
+  width: 160px;
+  height: 100px;
   border-radius: 50%;
-  padding: 12px;
+  padding: 16px;
   object-fit: contain;
+  background: #FFFFFF;
   box-shadow: 0 4px 14px rgba(123, 28, 46, 0.2);
 }
 

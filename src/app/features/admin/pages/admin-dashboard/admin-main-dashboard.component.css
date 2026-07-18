@@ -706,3 +706,27 @@ textarea.form-control {
   background: rgba(153, 27, 27, 0.1);
   border-color: #991b1b;
 }
+
+image-cropper {
+  display: block;
+  max-height: 400px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #171717;
+}
+
+.cropper-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #737373;
+}
+
+.spinner-sm {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+  margin-bottom: 0;
+}

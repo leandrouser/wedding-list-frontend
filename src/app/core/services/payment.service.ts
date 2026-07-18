@@ -10,6 +10,8 @@ export interface PreferencePayload {
   quantity: number;
   buyerName: string;
   buyerContact: string;
+  buyerEmail: string;
+  buyerCpf: string;
   message: string;
   giftListId: number | null;
 }

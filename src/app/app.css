@@ -1,1 +1,24 @@
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Dancing+Script:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Cores principais */
+  --primary: #C9A227;        /* Dourado */
+  --primary-dark: #7B1E3D;   /* Vinho / Borgonha */
+
+  /* Fundo */
+  --bg-cream: #FDF8F2;
+
+  /* Textos */
+  --text-main: #1A1A1A;
+  --text-muted: #6B6B6B;
+  --text-light: #9A9A9A;
+
+  /* Bordas */
+  --border-color: rgba(0, 0, 0, 0.08);
+
+  /* Raios de borda */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+}

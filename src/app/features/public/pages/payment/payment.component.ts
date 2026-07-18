@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { PaymentService } from '../../../../core/services/payment.service';
 import { GiftItem } from '../../../../core/services/product.service';
+import { GiftListService } from '../../../../core/services/gift-list.service';
+import { StoreService } from '../../../../core/services/store.service';
 
 @Component({
   selector: 'app-payment',
@@ -14,6 +16,8 @@ import { GiftItem } from '../../../../core/services/product.service';
 export class PaymentComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly paymentService = inject(PaymentService);
+  private readonly giftListService = inject(GiftListService);
+  private readonly storeService = inject(StoreService);
 
   protected readonly step = signal<'loading' | 'ready' | 'error'>('loading');
   protected readonly errorMessage = signal<string | null>(null);
@@ -21,10 +25,15 @@ export class PaymentComponent implements OnInit {
   protected product: GiftItem | null = null;
   protected guestName = '';
   protected guestContact = '';
+  protected guestEmail = '';
+  protected guestCpf = '';
   protected guestMessage = '';
   protected quantity = 1;
   protected coupleWhatsapp = '';
   protected giftListId: number | null = null;
+  protected uniqueLink: string | null = null;
+  protected listTitle = '';
+  protected storeWhatsapp = '';
 
   protected paymentUrl: string | null = null;
   protected purchaseId: string | null = null;
@@ -32,7 +41,6 @@ export class PaymentComponent implements OnInit {
   ngOnInit(): void {
     const currentNav = this.router.getCurrentNavigation();
     const state = currentNav?.extras?.state;
-
     const historyState = history.state;
 
     if (state?.['product']) {
@@ -45,6 +53,7 @@ export class PaymentComponent implements OnInit {
       return;
     }
 
+    this.loadListTitle();
     this.createPreference();
   }
 
@@ -52,10 +61,28 @@ export class PaymentComponent implements OnInit {
     this.product = state.product;
     this.guestName = state.guestName;
     this.guestContact = state.guestContact;
+    this.guestEmail = state.guestEmail;
+    this.guestCpf = state.guestCpf;
     this.guestMessage = state.message;
-    this.quantity = state.quantity;
     this.coupleWhatsapp = state.coupleWhatsapp;
     this.giftListId = state.giftListId;
+    this.uniqueLink = state.uniqueLink;
+  }
+
+  private loadListTitle(): void {
+    if (!this.uniqueLink) return;
+    this.giftListService.getGiftListByLink(this.uniqueLink).subscribe({
+      next: (list) => {
+        this.listTitle = list.giftTitle ?? '';
+        this.storeWhatsapp = this.formatWhatsapp(list.storeWhatsapp ?? '');
+      },
+      error: () => { /* falha silenciosa: mensagem/contato caem sem esses dados */ }
+    });
+  }
+
+  private formatWhatsapp(raw: string): string {
+    const digits = raw.replace(/\D/g, '');
+    return digits.startsWith('55') ? digits : `55${digits}`;
   }
 
   createPreference(): void {
@@ -71,6 +98,8 @@ export class PaymentComponent implements OnInit {
       quantity: this.quantity,
       buyerName: this.guestName,
       buyerContact: this.guestContact,
+      buyerEmail: this.guestEmail,
+      buyerCpf: this.guestCpf,
       message: this.guestMessage,
       giftListId: this.giftListId
     }).subscribe({
@@ -93,21 +122,17 @@ export class PaymentComponent implements OnInit {
     }
   }
 
-  notifyCouple(): void {
-    if (!this.coupleWhatsapp || !this.product) return;
-    
-    const phone = this.coupleWhatsapp.replace(/\D/g, '');
-    let msg = `🎁 Novo presente comprado!\n`;
-    msg += `Presente: ${this.product.name}\n`;
-    msg += `Quantidade: ${this.quantity}\n`;
-    msg += `Convidado: ${this.guestName}\n`;
-    msg += `Contato: ${this.guestContact}\n`;
-    if (this.guestMessage) {
-      msg += `Mensagem: ${this.guestMessage}`;
-    }
+  contactStore(): void {
+    if (!this.product || !this.storeWhatsapp) return;
+
+    const listPart = this.listTitle ? ` da lista "${this.listTitle}"` : '';
+    const msg =
+      `Olá! Meu nome é ${this.guestName}.\n` +
+      `Estou entrando em contato sobre o presente${listPart}.\n` +
+      `Produto: ${this.product.name}`;
 
     const encodedMsg = encodeURIComponent(msg);
-    window.open(`https://wa.me/${phone}?text=${encodedMsg}`, '_blank');
+    window.open(`https://wa.me/${this.storeWhatsapp}?text=${encodedMsg}`, '_blank');
   }
 
   cancel(): void {

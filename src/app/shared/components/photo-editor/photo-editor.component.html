@@ -1,0 +1,41 @@
+<div class="pe-backdrop">
+  <div class="pe-panel">
+    <div class="pe-header">
+      <h3>Ajustar foto</h3>
+      <button type="button" class="pe-close" (click)="cancel()">✕</button>
+    </div>
+
+    <div class="pe-cropper-wrap">
+      <image-cropper
+        [imageFile]="imageFile ?? undefined"
+        [maintainAspectRatio]="true"
+        [aspectRatio]="aspectRatio"
+        [roundCropper]="roundCropper"
+        [transform]="transform"
+        [autoCrop]="true"
+        format="jpeg"
+        [onlyScaleDown]="false"
+        (imageCropped)="imageCroppedEvent($event)"
+        (imageLoaded)="imageLoaded($event)"
+        (loadImageFailed)="loadImageFailed()">
+      </image-cropper>
+    </div>
+
+    <div class="pe-controls">
+      <div class="pe-control-group">
+        <button type="button" class="pe-btn" (click)="rotateLeft()" title="Girar à esquerda">⟲</button>
+        <button type="button" class="pe-btn" (click)="rotateRight()" title="Girar à direita">⟳</button>
+      </div>
+      <div class="pe-control-group">
+        <button type="button" class="pe-btn" (click)="zoomOut()" title="Diminuir zoom">−</button>
+        <span class="pe-zoom-label">{{ (zoom() * 100) | number:'1.0-0' }}%</span>
+        <button type="button" class="pe-btn" (click)="zoomIn()" title="Aumentar zoom">+</button>
+      </div>
+    </div>
+
+    <div class="pe-actions">
+      <button type="button" class="pe-btn-outline" (click)="cancel()">Cancelar</button>
+      <button type="button" class="pe-btn-gold" (click)="confirm()">Usar foto</button>
+    </div>
+  </div>
+</div>

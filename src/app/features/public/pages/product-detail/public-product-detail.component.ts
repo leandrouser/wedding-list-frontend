@@ -24,20 +24,29 @@ export class PublicProductDetailComponent implements OnInit {
 
   protected readonly guestName = signal('');
   protected readonly guestContact = signal('');
+  protected readonly guestEmail = signal('');
+  protected readonly guestCpf = signal('');
   protected readonly guestMessage = signal('');
   protected readonly selectedQuantity = signal(1);
 
   protected coupleWhatsapp = '';
   protected giftListId = 0;
+  protected uniqueLink = '';
 
   ngOnInit(): void {
     const productId = Number(this.route.snapshot.paramMap.get('id'));
     const giftListId = Number(this.route.snapshot.queryParamMap.get('giftListId'));
     this.coupleWhatsapp = this.route.snapshot.queryParamMap.get('coupleWhatsapp') || '';
+    this.uniqueLink = this.route.snapshot.queryParamMap.get('uniqueLink') || '';
     this.giftListId = giftListId;
 
     const currentNav = this.router.getCurrentNavigation();
     const stateProduct = currentNav?.extras?.state?.['product'] as GiftItem;
+    const stateUniqueLink = currentNav?.extras?.state?.['uniqueLink'] as string;
+
+    if (stateUniqueLink) {
+      this.uniqueLink = stateUniqueLink;
+    }
 
     if (stateProduct) {
       this.product.set(stateProduct);
@@ -108,7 +117,8 @@ export class PublicProductDetailComponent implements OnInit {
         message: this.guestMessage().trim(),
         quantity: this.selectedQuantity(),
         coupleWhatsapp: this.coupleWhatsapp,
-        giftListId: this.giftListId
+        giftListId: this.giftListId,
+        uniqueLink: this.uniqueLink
       }
     });
   }

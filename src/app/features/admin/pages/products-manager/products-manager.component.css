@@ -760,6 +760,94 @@ textarea.form-control {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
+.btn-release {
+  border-color: rgba(201, 162, 39, 0.35);
+  color: #92400e;
+  background: rgba(201, 162, 39, 0.06);
+}
+.btn-release:hover { background: rgba(201, 162, 39, 0.12); border-color: #92400e; }
+
+.modal-purchases {
+  width: min(560px, 100%);
+}
+
+.purchases-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.purchase-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  background: #fafafa;
+}
+
+.purchase-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.purchase-status-chip {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  margin-bottom: 6px;
+}
+
+.purchase-status-chip.status-pending {
+  background: rgba(254, 243, 199, 0.9);
+  color: #92400e;
+}
+
+.purchase-status-chip.status-confirmed {
+  background: rgba(220, 252, 231, 0.9);
+  color: #166534;
+}
+
+.purchase-guest {
+  margin: 0 0 2px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #171717;
+}
+
+.purchase-meta {
+  margin: 0;
+  font-size: 12px;
+  color: #737373;
+}
+
+.purchase-message {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #737373;
+  font-style: italic;
+}
+
+.purchase-locked-note {
+  font-size: 11px;
+  color: #9a9a9a;
+  max-width: 140px;
+  text-align: right;
+  line-height: 1.4;
+}
+
+.loading-state-sm,
+.empty-state-sm {
+  min-height: 120px;
+  padding: 24px;
+}
+
 .eyebrow {
   font-size: 11px;
   font-weight: 700;

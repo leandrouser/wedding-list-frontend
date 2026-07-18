@@ -3,11 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { ApiConfig } from '../config/api-config';
 import { Observable, map } from 'rxjs';
 
-export enum ProductStatus {
-  AVAILABLE,
-  PARTIALLY_PURCHASED,
-  PURCHASED
-}
+export type ProductStatus = 'AVAILABLE' | 'PARTIALLY_PURCHASED' | 'PURCHASED';
 
 export interface ProductCreateDTO {
   giftListId: number;
@@ -26,7 +22,7 @@ export interface ProductResponseDTO {
   availableQuantity: number;
   price: number;
   photoUrl: string;
-  ProductStatus: string;
+  status: ProductStatus;
 }
 
 export interface ProductUpdateDTO {
@@ -57,19 +53,19 @@ export class ProductService {
   private readonly baseUrl = ApiConfig.baseUrl;
 
   getProductsByGiftList(giftListId: number): Observable<GiftItem[]> {
-    return this.http.get<GiftItem[]>(`${this.baseUrl}/products/gift-list/${giftListId}`).pipe(
+    return this.http.get<ProductResponseDTO[]>(`${this.baseUrl}/products/gift-list/${giftListId}`).pipe(
       map(items => items.map(item => ({
         ...item,
-        isPurchased: (item as any).status === 'PURCHASED' || item.isPurchased === true
+        isPurchased: item.status === 'PURCHASED'
       })))
     );
   }
 
   getProductById(productId: number): Observable<GiftItem> {
-    return this.http.get<GiftItem>(`${this.baseUrl}/products/${productId}`).pipe(
+    return this.http.get<ProductResponseDTO>(`${this.baseUrl}/products/${productId}`).pipe(
       map(item => ({
         ...item,
-        isPurchased: (item as any).status === 'PURCHASED' || item.isPurchased === true
+        isPurchased: item.status === 'PURCHASED'
       }))
     );
   }

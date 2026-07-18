@@ -3,7 +3,7 @@
    Paleta: Borgonha #8B1A2B + Dourado #C9A227
    ============================================= */
 
-/* Navegação */
+/* Navegação (só aparece em loading/erro) */
 .top-nav {
   display: flex;
   align-items: center;
@@ -46,11 +46,6 @@
   text-align: center;
 }
 
-/* Espaçador espelha o btn-back para centralizar o título */
-.top-nav-spacer {
-  width: 80px;
-}
-
 /* Seção de Imagem */
 .image-section {
   position: relative;
@@ -80,22 +75,59 @@
   filter: opacity(0.7);
 }
 
+/* Botões flutuantes sobre a imagem (estilo referência) */
+.btn-float {
+  position: absolute;
+  top: 14px;
+  z-index: 10;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--primary-dark);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.btn-float:hover {
+  background: #FFFFFF;
+  transform: scale(1.06);
+}
+
+.btn-float:active {
+  transform: scale(0.94);
+}
+
+.btn-float-back {
+  left: 14px;
+}
+
 /* Tag de status flutuante sobre a imagem */
 .image-status-tag {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 14px;
+  right: 14px;
+  z-index: 10;
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid var(--border-color);
-  padding: 5px 12px;
+  padding: 6px 13px;
   border-radius: 20px;
   font-size: 10px;
   font-weight: 700;
   color: var(--primary-dark);
-  letter-spacing: 0.8px;
+  letter-spacing: 0.6px;
   text-transform: uppercase;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .image-status-tag.purchased {
@@ -106,12 +138,12 @@
 
 /* Cabeçalho do Produto */
 .product-header-info {
-  padding: 20px 18px 0;
+  padding: 22px 18px 0;
 }
 
 .detail-product-name {
   font-family: 'Playfair Display', serif;
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 700;
   color: var(--text-main);
   line-height: 1.3;
@@ -122,19 +154,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 6px;
 }
 
-/* Preço em Playfair para consistência com os cards */
 .price-val {
   font-family: 'Playfair Display', serif;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
   color: var(--primary-dark);
   letter-spacing: -0.02em;
 }
 
-/* Badge de quantidade disponível */
 .qty-available-badge {
   display: inline-flex;
   align-items: center;
@@ -146,6 +178,7 @@
   font-size: 11px;
   color: var(--text-muted);
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .qty-available-badge strong {
@@ -153,7 +186,6 @@
   font-weight: 700;
 }
 
-/* Linha dourada sob o preço */
 .price-underline {
   height: 2px;
   width: 56px;
@@ -193,7 +225,7 @@
   align-items: center;
   gap: 10px;
   margin: 4px 18px 20px;
-  opacity: 0.4;
+  opacity: 0.45;
 }
 
 .section-divider-line {
@@ -232,37 +264,64 @@
 }
 
 .form-group {
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .form-label {
   display: block;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-muted);
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
+}
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 18px !important;
+  color: var(--primary-dark);
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.input-wrap-textarea .input-icon-textarea {
+  top: 14px;
+  transform: none;
 }
 
 .form-input {
   width: 100%;
-  padding: 11px 14px;
+  padding: 13px 14px 13px 42px;
   font-size: 13px;
   font-family: inherit;
   color: var(--text-main);
-  background-color: #FFFFFF;
+  background-color: #FAF7F2;
   border: 1.5px solid var(--border-color);
   border-radius: var(--radius-md);
   outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
   -webkit-appearance: none;
   appearance: none;
+  box-sizing: border-box;
 }
 
 .form-input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.1);
+  border-color: var(--primary-dark);
+  background-color: #FFFFFF;
+  box-shadow: 0 0 0 4px rgba(123, 30, 61, 0.1);
+}
+
+.input-wrap:focus-within .input-icon {
+  opacity: 1;
 }
 
 .form-input::placeholder {
@@ -270,6 +329,7 @@
 }
 
 .form-select {
+  padding-left: 14px;
   background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23707070' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
@@ -282,13 +342,7 @@
   resize: vertical;
   min-height: 90px;
   line-height: 1.5;
-}
-
-.char-hint {
-  font-size: 10px;
-  color: var(--text-light);
-  margin-top: 4px;
-  text-align: right;
+  padding-top: 13px;
 }
 
 /* Botão de Submissão */
@@ -320,13 +374,22 @@
   transform: scale(0.98);
 }
 
+.btn-arrow {
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+.btn-submit-payment:hover .btn-arrow {
+  transform: translateX(3px);
+}
+
 /* Rodapé de confiança */
 .trust-row {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 16px;
-  margin-top: 12px;
+  margin-top: 14px;
 }
 
 .trust-item {
@@ -337,9 +400,8 @@
   color: var(--text-light);
 }
 
-.trust-item i,
-.trust-item .trust-icon {
-  font-size: 13px;
+.trust-icon {
+  font-size: 12px;
   color: var(--primary);
 }
 

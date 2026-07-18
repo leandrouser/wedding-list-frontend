@@ -56,11 +56,11 @@
 
       <div class="products-grid">
         @for (product of products(); track product.id) {
-          <div 
-            class="product-card" 
-            [class.purchased]="product.isPurchased" 
+          <div
+            class="product-card"
+            [class.purchased]="product.isPurchased"
             [routerLink]="['/produto', product.id]"
-            [queryParams]="{ coupleWhatsapp: list.coupleWhatsapp, giftListId: list.id }"
+            [queryParams]="{ coupleWhatsapp: list.coupleWhatsapp, giftListId: list.id, uniqueLink: list.uniqueLink }"
           >
             <div class="product-image-wrapper">
               @if (product.photoUrl) {
@@ -70,7 +70,7 @@
                   <span>🎁</span>
                 </div>
               }
-              
+
               @if (product.isPurchased) {
                 <div class="purchased-badge">Comprado</div>
               }
@@ -78,10 +78,10 @@
 
             <div class="product-info">
               <h3 class="product-name">{{ product.name }}</h3>
-              
+
               <div class="product-footer">
                 <span class="product-price">{{ product.price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
-                
+
                 <div class="product-status">
                   @if (product.isPurchased) {
                     <span class="status-icon success">✓</span>

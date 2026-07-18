@@ -1,10 +1,13 @@
 <div class="container">
-  <div class="top-nav">
-    <button (click)="goBack()" class="btn-back">
-      <span>←</span> Voltar
-    </button>
-    <div class="top-nav-title">Detalhe do Presente</div>
-  </div>
+
+  @if (isLoading() || errorMessage()) {
+    <div class="top-nav">
+      <button (click)="goBack()" class="btn-back">
+        <span>←</span> Voltar
+      </button>
+      <div class="top-nav-title">Detalhe do Presente</div>
+    </div>
+  }
 
   @if (isLoading()) {
     <div class="loader-container">
@@ -24,7 +27,14 @@
 
   @if (!isLoading() && !errorMessage() && product(); as prod) {
     <main class="flex-grow">
+
       <div class="image-section">
+        <button (click)="goBack()" class="btn-float btn-float-back" aria-label="Voltar">←</button>
+
+        <div class="image-status-tag" [class.purchased]="prod.isPurchased">
+          {{ prod.isPurchased ? '❤️ Presenteado' : '✨ Disponível' }}
+        </div>
+
         @if (prod.photoUrl) {
           <img [src]="prod.photoUrl" alt="Foto do Presente" class="detail-product-image" />
         } @else {
@@ -35,11 +45,21 @@
       </div>
 
       <div class="content-padding">
+
         <div class="product-header-info">
           <h1 class="detail-product-name">{{ prod.name }}</h1>
-          <div class="detail-price-badge">
+
+          <div class="price-row">
             <span class="price-val">{{ prod.price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
+            @if (!prod.isPurchased) {
+              <span class="qty-available-badge">
+                <strong>{{ prod.availableQuantity ?? prod.quantity }}</strong>
+                disponíve{{ (prod.availableQuantity ?? prod.quantity) === 1 ? 'l' : 'is' }}
+              </span>
+            }
           </div>
+
+          <div class="price-underline"></div>
         </div>
 
         @if (prod.description) {
@@ -49,27 +69,33 @@
           </div>
         }
 
-        <hr class="divider" />
+        <div class="section-divider">
+          <span class="section-divider-line"></span>
+          <span class="section-divider-icon">✦</span>
+          <span class="section-divider-line"></span>
+        </div>
 
         @if (prod.isPurchased) {
           <div class="already-purchased-box">
             <span class="heart-badge">❤️</span>
             <h3>Este presente já foi comprado!</h3>
             <p>Os noivos já ganharam esse carinho. Por favor, volte à lista e selecione outro presente disponível.</p>
-            <button (click)="goBack()" class="btn-gold" style="margin-top: 16px; width: 100%;">Voltar à Lista</button>
+            <button (click)="goBack()" class="btn-back-to-list">Voltar à Lista</button>
           </div>
         } @else {
           <form (submit)="onSubmit(); $event.preventDefault()" class="guest-form">
-            <h3 class="form-title">Presentear Casal</h3>
-            <p class="form-subtitle">Preencha seus dados para prosseguir ao pagamento do presente.</p>
+            <div class="form-header">
+              <h3 class="form-title">Presentear</h3>
+              <p class="form-subtitle">Preencha seus dados para prosseguir ao pagamento do presente.</p>
+            </div>
 
             @if (getQuantityRange().length > 1) {
               <div class="form-group">
                 <label class="form-label" for="qty">Escolha a Quantidade</label>
-                <select 
+                <select
                   id="qty"
-                  [ngModel]="selectedQuantity()" 
-                  (ngModelChange)="selectedQuantity.set($event)" 
+                  [ngModel]="selectedQuantity()"
+                  (ngModelChange)="selectedQuantity.set($event)"
                   name="selectedQuantity"
                   class="form-input form-select"
                 >
@@ -82,48 +108,96 @@
 
             <div class="form-group">
               <label class="form-label" for="name">Seu Nome</label>
-              <input 
-                type="text" 
-                id="name"
-                [ngModel]="guestName()" 
-                (ngModelChange)="guestName.set($event)" 
-                name="guestName"
-                placeholder="Ex: Maria Souza" 
-                class="form-input"
-                required
-              />
+              <div class="input-wrap">
+                <span class="material-icons input-icon">person</span>
+                <input
+                  type="text"
+                  id="name"
+                  [ngModel]="guestName()"
+                  (ngModelChange)="guestName.set($event)"
+                  name="guestName"
+                  placeholder="Ex: Maria Souza"
+                  class="form-input"
+                  required
+                />
+              </div>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="contact">Seu WhatsApp / Telefone</label>
-              <input 
-                type="tel" 
-                id="contact"
-                [ngModel]="guestContact()" 
-                (ngModelChange)="guestContact.set($event)" 
-                name="guestContact"
-                placeholder="Ex: (11) 99999-9999" 
-                class="form-input"
-                required
-              />
+              <div class="input-wrap">
+                <span class="material-icons input-icon">phone</span>
+                <input
+                  type="tel"
+                  id="contact"
+                  [ngModel]="guestContact()"
+                  (ngModelChange)="guestContact.set($event)"
+                  name="guestContact"
+                  placeholder="Ex: (11) 99999-9999"
+                  class="form-input"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="email">Seu E-mail</label>
+              <div class="input-wrap">
+                <span class="material-icons input-icon">email</span>
+                <input
+                  type="email"
+                  id="email"
+                  [ngModel]="guestEmail()"
+                  (ngModelChange)="guestEmail.set($event)"
+                  name="guestEmail"
+                  placeholder="Ex: maria@email.com"
+                  class="form-input"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="cpf">Seu CPF</label>
+              <div class="input-wrap">
+                <span class="material-icons input-icon">badge</span>
+                <input
+                  type="text"
+                  id="cpf"
+                  [ngModel]="guestCpf()"
+                  (ngModelChange)="guestCpf.set($event)"
+                  name="guestCpf"
+                  placeholder="000.000.000-00"
+                  class="form-input"
+                  required
+                />
+              </div>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="message">Mensagem de Carinho (Opcional)</label>
-              <textarea 
-                id="message"
-                [ngModel]="guestMessage()" 
-                (ngModelChange)="guestMessage.set($event)" 
-                name="guestMessage"
-                placeholder="Deseje algo lindo ao casal..." 
-                rows="4" 
-                class="form-input form-textarea"
-              ></textarea>
+              <div class="input-wrap input-wrap-textarea">
+                <span class="material-icons input-icon input-icon-textarea">edit_note</span>
+                <textarea
+                  id="message"
+                  [ngModel]="guestMessage()"
+                  (ngModelChange)="guestMessage.set($event)"
+                  name="guestMessage"
+                  placeholder="Deseje algo lindo ao casal..."
+                  rows="4"
+                  class="form-input form-textarea"
+                ></textarea>
+              </div>
             </div>
 
-            <button type="submit" class="btn-gold btn-submit-payment">
-              Confirmar & Pagar Presente ➔
+            <button type="submit" class="btn-submit-payment">
+              Confirmar & Pagar Presente <span class="btn-arrow">➔</span>
             </button>
+
+            <div class="trust-row">
+              <span class="trust-item"><span class="trust-icon">🔒</span> Pagamento seguro</span>
+              <span class="trust-item"><span class="trust-icon">🚚</span> Entrega facilitada</span>
+            </div>
           </form>
         }
       </div>

@@ -4,11 +4,13 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { GiftList, GiftListService } from '../../../../core/services/gift-list.service';
 import { GiftItem, ProductService } from '../../../../core/services/product.service';
+import { PhotoEditorComponent } from "../../../../shared/components/photo-editor/photo-editor.component";
+import { PurchaseService, Purchase } from '../../../../core/services/purchase.service';
 
 @Component({
   selector: 'app-gift-list-view',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, PhotoEditorComponent],
   templateUrl: './products-manager.component.html',
   styleUrl: './products-manager.component.css'
 })
@@ -18,12 +20,23 @@ export class ProductsManagerComponent implements OnInit {
   private readonly giftListService = inject(GiftListService);
   private readonly productService = inject(ProductService);
 
+  private readonly purchaseService = inject(PurchaseService);
+
+  protected showPurchasesModal = signal(false);
+  protected purchasesForProduct = signal<Purchase[]>([]);
+  protected isLoadingPurchases = signal(false);
+  protected cancellingPurchaseId = signal<number | null>(null);
+  protected purchasesModalError = signal<string | null>(null);
+
   protected list = signal<GiftList | null>(null);
   protected products = signal<GiftItem[]>([]);
   protected isLoading = signal(true);
   protected isLoadingProducts = signal(true);
   protected errorMessage = signal<string | null>(null);
   protected successMessage = signal<string | null>(null);
+
+  protected showPhotoEditor = signal(false);
+  protected rawFileForEdit = signal<File | null>(null);
 
   protected showProductForm = signal(false);
   protected isSavingProduct = signal(false);
@@ -128,10 +141,24 @@ export class ProductsManagerComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
+    this.rawFileForEdit.set(file);
+    this.showPhotoEditor.set(true);
+    input.value = '';
+  }
+
+  onPhotoEditConfirmed(blob: Blob): void {
+    const file = new File([blob], `produto-${Date.now()}.jpg`, { type: 'image/jpeg' });
     this.productPhotoFile.set(file);
     const reader = new FileReader();
     reader.onload = e => this.productPhotoPreview.set(e.target?.result as string);
     reader.readAsDataURL(file);
+    this.showPhotoEditor.set(false);
+    this.rawFileForEdit.set(null);
+  }
+
+  onPhotoEditCancelled(): void {
+    this.showPhotoEditor.set(false);
+    this.rawFileForEdit.set(null);
   }
 
   removePhoto(): void {
@@ -261,6 +288,53 @@ export class ProductsManagerComponent implements OnInit {
     if (avail === 0) return 'status-reserved';
     if (avail < product.quantity) return 'status-partial';
     return 'status-available';
+  }
+
+  openPurchasesModal(product: GiftItem): void {
+    if (!product.id) return;
+    this.selectedProduct.set(product);
+    this.showPurchasesModal.set(true);
+    this.purchasesModalError.set(null);
+    this.loadPurchasesForProduct(product.id);
+  }
+
+  closePurchasesModal(): void {
+    this.showPurchasesModal.set(false);
+    this.purchasesForProduct.set([]);
+    this.purchasesModalError.set(null);
+  }
+
+  private loadPurchasesForProduct(productId: number): void {
+    this.isLoadingPurchases.set(true);
+    this.purchaseService.getPurchasesByProduct(productId).subscribe({
+      next: purchases => {
+        this.purchasesForProduct.set(purchases.filter(p => p.status !== 'CANCELLED'));
+        this.isLoadingPurchases.set(false);
+      },
+      error: () => {
+        this.purchasesModalError.set('Não foi possível carregar as reservas deste produto.');
+        this.isLoadingPurchases.set(false);
+      }
+    });
+  }
+
+  cancelReservation(purchase: Purchase): void {
+    if (!purchase.id) return;
+    this.cancellingPurchaseId.set(purchase.id);
+    this.purchaseService.cancelPurchase(purchase.id).subscribe({
+      next: () => {
+        this.cancellingPurchaseId.set(null);
+        this.successMessage.set('Reserva liberada. Produto disponível novamente.');
+        this.loadProducts();
+        const productId = this.selectedProduct()?.id;
+        if (productId) this.loadPurchasesForProduct(productId);
+      },
+      error: (err) => {
+        this.cancellingPurchaseId.set(null);
+        const msg = err?.error?.message || 'Não foi possível liberar essa reserva.';
+        this.purchasesModalError.set(msg);
+      }
+    });
   }
 
   goBack(): void {

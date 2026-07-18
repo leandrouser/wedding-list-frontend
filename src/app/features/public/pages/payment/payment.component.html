@@ -8,7 +8,7 @@
   </div>
 
   <main class="content-padding flex-grow payment-main">
-    
+
     <!-- State: Loading -->
     @if (step() === 'loading') {
       <div class="loader-container">
@@ -26,7 +26,7 @@
         </div>
         <h3 class="status-title error-text">Ocorreu um Erro</h3>
         <p class="status-subtitle">{{ errorMessage() }}</p>
-        
+
         <div class="action-buttons">
           @if (product) {
             <button (click)="createPreference()" class="btn-gold">Tentar Novamente</button>
@@ -43,10 +43,10 @@
         <div class="icon-wrapper success">
           <span>🛍️</span>
         </div>
-        
+
         <h3 class="status-title">Tudo Pronto!</h3>
         <p class="status-subtitle">Confira os detalhes abaixo e clique para pagar com segurança via Mercado Pago.</p>
-        
+
         <div class="receipt-card">
           <div class="receipt-row">
             <span class="receipt-label">Presente</span>
@@ -66,13 +66,11 @@
           <button (click)="pay()" class="btn-mp">
             <span class="mp-icon">💳</span> Pagar com Mercado Pago ➔
           </button>
-          
-          @if (coupleWhatsapp) {
-            <button (click)="notifyCouple()" class="btn-wpp">
-              <span class="wpp-icon">💬</span> Avisar Noivos no WhatsApp
-            </button>
-          }
-          
+
+          <button (click)="contactStore()" class="btn-wpp" [disabled]="!storeWhatsapp">
+            <span class="wpp-icon">🏪</span> Entrar em Contato com a Loja
+          </button>
+
           <button (click)="cancel()" class="btn-outline cancel-btn">Cancelar</button>
         </div>
       </div>

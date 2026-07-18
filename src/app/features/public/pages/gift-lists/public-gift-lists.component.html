@@ -8,7 +8,7 @@
     <div class="el-intro-icon-wrap">
       <img src="assets/logo.jpeg" alt="Logo D'Lara" class="el-gift-lead-logo" />
     </div>
-    
+
     <span class="el-intro-eyebrow">Encontre a lista</span>
     <h1 class="el-intro-title">Qual lista você<br>está procurando?</h1>
     <p class="el-intro-desc">
@@ -18,7 +18,7 @@
 
   <form class="el-search-wrap" (ngSubmit)="onSearchSubmit()">
     <div class="el-search-field" [class.el-search-focused]="searchFocused">
-      
+
       <input
         type="text"
         class="el-search-input"
@@ -71,7 +71,7 @@
               <div class="el-photo-ring">
                 <div class="el-photo-inner">
                   @if (list.photoUrl) {
-                    <img [src]="list.photoUrl" alt="Foto do casal" class="el-couple-photo" />
+                    <img [src]="list.photoUrl" alt="Foto do casal" class="el-couple-photo" (error)="onPhotoError($event)" />
                   } @else {
                     <span class="material-icons el-photo-icon">favorite</span>
                   }

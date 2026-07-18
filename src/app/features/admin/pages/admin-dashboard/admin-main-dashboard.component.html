@@ -43,7 +43,7 @@
       <button type="button" class="btn-outline" (click)="openStoreForm()">&#9881; Minha Loja</button>
       <button type="button" class="btn-outline" (click)="openAccessForm()">Cadastrar Acesso</button>
       <button type="button" class="btn-gold" (click)="openListForm()">Nova Lista</button>
-      
+
     </div>
   </header>
 
@@ -374,6 +374,46 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+}
+
+@if (showCropper()) {
+  <div class="modal-backdrop">
+    <div class="modal-panel modal-sm">
+      <div class="modal-header">
+        <h3>Ajustar foto</h3>
+        <button type="button" class="btn-close" (click)="cancelCrop()">x</button>
+      </div>
+
+      <image-cropper
+        [imageChangedEvent]="imageChangedEvent"
+        [maintainAspectRatio]="true"
+        [aspectRatio]="1"
+        [roundCropper]="true"
+        format="jpeg"
+        (imageCropped)="imageCropped($event)"
+        (imageLoaded)="onImageLoaded()"
+        (cropperReady)="onCropperReady()"
+        (loadImageFailed)="onLoadImageFailed()">
+      </image-cropper>
+
+      @if (isCropperLoading()) {
+        <p class="cropper-status">
+          <span class="spinner spinner-sm"></span> Preparando imagem...
+        </p>
+      }
+
+      <div class="modal-actions" style="margin-top: 20px;">
+        <button type="button" class="btn-outline" (click)="cancelCrop()">Cancelar</button>
+        <button
+          type="button"
+          class="btn-gold"
+          [disabled]="isCropperLoading()"
+          (click)="confirmCrop()">
+          @if (isCropperLoading()) { Processando... } @else { Aplicar recorte }
+        </button>
+      </div>
     </div>
   </div>
 }

@@ -6,11 +6,12 @@ import { UserService, CoupleDTO } from '../../../../core/services/user.service';
 import { GiftList, GiftListService } from '../../../../core/services/gift-list.service';
 import { StoreService } from '../../../../core/services/store.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ImageCropperComponent, ImageCroppedEvent } from 'ngx-image-cropper';
 
 @Component({
   selector: 'app-admin-main-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ImageCropperComponent],
   templateUrl: './admin-main-dashboard.component.html',
   styleUrls: ['./admin-main-dashboard.component.css']
 })
@@ -46,6 +47,12 @@ export class AdminMainDashboardComponent implements OnInit {
   protected isLinking = signal(false);
   protected isEditingLink = signal(false);
 
+  protected showCropper = signal(false);
+  protected imageChangedEvent: Event | null = null;
+  protected croppedImagePreview = signal<string | null>(null);
+  private cropperMode: 'create' | 'edit' = 'create';
+  protected croppedBlob = signal<Blob | null>(null);
+  protected isCropperLoading = signal(true);
 
   protected showEditForm = signal(false);
   protected isSavingEdit = signal(false);
@@ -398,31 +405,103 @@ export class AdminMainDashboardComponent implements OnInit {
 
   onPhotoSelected(event: Event, mode: 'create' | 'edit'): void {
     const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-    this.applyPhoto(file, mode);
+    if (!input.files?.[0]) return;
+    this.openCropper(event, mode);
   }
 
   onCameraCapture(event: Event, mode: 'create' | 'edit'): void {
     const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-    this.applyPhoto(file, mode);
+    if (!input.files?.[0]) return;
+    this.openCropper(event, mode);
   }
 
-  private applyPhoto(file: File, mode: 'create' | 'edit'): void {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const preview = e.target?.result as string;
-      if (mode === 'create') {
-        this.listPhotoFile.set(file);
-        this.listPhotoPreview.set(preview);
-      } else {
-        this.editPhotoFile.set(file);
-        this.editPhotoPreview.set(preview);
-      }
-    };
-    reader.readAsDataURL(file);
+  private openCropper(event: Event, mode: 'create' | 'edit'): void {
+    this.cropperMode = mode;
+    this.imageChangedEvent = event;
+    this.croppedImagePreview.set(null);
+    this.croppedBlob.set(null);
+    this.isCropperLoading.set(true); // volta a "carregando" a cada nova imagem
+    this.showCropper.set(true);
+  }
+
+  cancelCrop(): void {
+    this.resetFileInput();
+    this.showCropper.set(false);
+    this.imageChangedEvent = null;
+    this.croppedImagePreview.set(null);
+  }
+
+  confirmCrop(): void {
+    const blob = this.croppedBlob();
+    const base64 = this.croppedImagePreview();
+
+    if (!blob && !base64) {
+      console.warn('Nenhuma imagem recortada disponível ainda.');
+      return;
+    }
+
+    const filename = `foto-${Date.now()}.jpg`;
+    const file = blob
+      ? new File([blob], filename, { type: blob.type || 'image/jpeg' })
+      : this.dataUrlToFile(base64!, filename);
+
+    const previewUrl = base64 ?? URL.createObjectURL(blob!);
+
+    if (this.cropperMode === 'create') {
+      this.listPhotoFile.set(file);
+      this.listPhotoPreview.set(previewUrl);
+    } else {
+      this.editPhotoFile.set(file);
+      this.editPhotoPreview.set(previewUrl);
+    }
+
+    this.resetFileInput();
+    this.showCropper.set(false);
+    this.imageChangedEvent = null;
+    this.croppedImagePreview.set(null);
+    this.croppedBlob.set(null);
+  }
+
+  private resetFileInput(): void {
+    const target = this.imageChangedEvent?.target as HTMLInputElement | undefined;
+    if (target) target.value = '';
+  }
+
+  private dataUrlToFile(dataUrl: string, filename: string): File {
+    const [header, base64Data] = dataUrl.split(',');
+    const mime = header.match(/:(.*?);/)?.[1] ?? 'image/jpeg';
+    const binary = atob(base64Data);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return new File([bytes], filename, { type: mime });
+  }
+
+  onImageLoaded(): void {
+    console.log('✅ Imagem carregada no cropper');
+  }
+
+  onCropperReady(): void {
+    console.log('✅ Cropper pronto');
+  }
+
+  onLoadImageFailed(): void {
+    console.error('❌ Falha ao carregar imagem no cropper');
+    this.isCropperLoading.set(false);
+    this.errorMessage.set('Não foi possível carregar essa imagem. Tente outra foto.');
+    this.showCropper.set(false);
+  }
+
+  imageCropped(event: ImageCroppedEvent): void {
+    console.log('✂️ imageCropped disparado', event);
+    if (event.base64) {
+      this.croppedImagePreview.set(event.base64);
+    } else if (event.objectUrl) {
+      this.croppedImagePreview.set(event.objectUrl);
+    }
+    this.croppedBlob.set(event.blob ?? null);
+    this.isCropperLoading.set(false); // agora sim está pronto pra aplicar
   }
 
   removePhoto(mode: 'create' | 'edit'): void {

@@ -44,14 +44,15 @@
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
+            "styles": [
+              "src/app/app.css"
+            ],
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public/assets",
-                "output": "/assets"
-              },
-              "src/favicon.ico",
-              "src/assets"
+                "input": "public",
+                "output": "/"
+              }
             ]
           },
           "configurations": {

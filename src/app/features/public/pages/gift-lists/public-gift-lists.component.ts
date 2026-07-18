@@ -19,17 +19,17 @@ export class PublicGiftListsComponent implements OnInit {
   protected readonly searchTerm = signal('');
   protected readonly isLoading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
-  
+
   protected readonly showResults = signal(false);
 
   searchFocused = false;
-  
+
   ngOnInit(): void {
   }
 
   onSearchSubmit(): void {
     const term = this.searchTerm().toLowerCase().trim();
-    
+
     if (!term) {
       this.showResults.set(false);
       this.filteredLists.set([]);
@@ -44,10 +44,15 @@ export class PublicGiftListsComponent implements OnInit {
     }
   }
 
+  onPhotoError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
+  }
+
   private fetchListsFromServer(term: string): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
-    
+
     this.giftListService.getAllPublicLists().subscribe({
       next: (lists) => {
         this.giftLists.set(lists);
@@ -64,7 +69,7 @@ export class PublicGiftListsComponent implements OnInit {
   }
 
   private applyFilter(term: string): void {
-    const filtered = this.giftLists().filter(list => 
+    const filtered = this.giftLists().filter(list =>
       list.coupleName.toLowerCase().includes(term) ||
       (list.giftTitle && list.giftTitle.toLowerCase().includes(term))
     );

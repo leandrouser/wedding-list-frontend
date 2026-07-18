@@ -13,6 +13,7 @@ export interface GiftList {
   storeWhatsapp?: string;
   photoUrl?: string;
   couplePhotoUrl?: string;
+  uniqueLink?: string;
   products?: any[];
    hasCouple?: boolean;
   coupleUsername?: string;
@@ -36,6 +37,15 @@ export class GiftListService {
 
   getGiftListById(id: number): Observable<GiftList> {
     return this.http.get<GiftList>(`${this.baseUrl}/gift-lists/${id}`).pipe(
+      map(l => ({
+        ...l,
+        photoUrl: l.photoUrl || l.couplePhotoUrl
+      }))
+    );
+  }
+
+  getGiftListByLink(uniqueLink: string): Observable<GiftList> {
+    return this.http.get<GiftList>(`${this.baseUrl}/gift-lists/link/${uniqueLink}`).pipe(
       map(l => ({
         ...l,
         photoUrl: l.photoUrl || l.couplePhotoUrl

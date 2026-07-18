@@ -39,14 +39,18 @@ export class PurchaseService {
     return this.http.get<Purchase[]>(`${this.baseUrl}/purchases/gift-list/${giftListId}`);
   }
 
+  getPurchasesByProduct(productId: number): Observable<Purchase[]> {
+    return this.http.get<Purchase[]>(`${this.baseUrl}/purchases/product/${productId}`);
+  }
+
   confirmPurchaseManually(purchaseId: number): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}/purchases/${purchaseId}/confirm`, {});
   }
 
   getSummaryByGiftList(giftListId: number): Observable<PurchasesSummary> {
-  return this.http.get<PurchasesSummary>(
-    `${this.baseUrl}/purchases/gift-list/${giftListId}/summary`
-  );
+    return this.http.get<PurchasesSummary>(
+      `${this.baseUrl}/purchases/gift-list/${giftListId}/summary`
+    );
   }
 
   cancelPurchase(purchaseId: number): Observable<void> {
